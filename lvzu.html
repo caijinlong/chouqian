@@ -11,15 +11,15 @@
 
   body {
     min-height: 100vh;
-    background: #0d0520;
-    color: #f0e6ff;
+    background: #0d0510;
+    color: #fff0e6;
     font-family: 'Noto Serif SC', serif;
     overflow-x: hidden;
   }
 
   .bg-layer {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: radial-gradient(ellipse at 50% 20%, #1a0a2e 0%, #0d0520 70%);
+    background: radial-gradient(ellipse at 50% 20%, #1a0815 0%, #0d0510 70%);
     z-index: 0;
   }
 
@@ -31,7 +31,7 @@
   .particle {
     position: absolute;
     width: 3px; height: 3px;
-    background: radial-gradient(circle, rgba(200,160,255,0.5), transparent);
+    background: radial-gradient(circle, rgba(220,170,100,0.5), transparent);
     border-radius: 50%;
     animation: floatUp linear infinite;
   }
@@ -54,16 +54,16 @@
   .header h1 {
     font-family: 'Ma Shan Zheng', cursive;
     font-size: 3rem;
-    color: #c9a0ff;
-    text-shadow: 0 0 30px rgba(200,160,255,0.4), 0 0 60px rgba(200,160,255,0.15), 0 2px 4px rgba(0,0,0,0.5);
+    color: #d4a0e0;
+    text-shadow: 0 0 30px rgba(212,160,224,0.4), 0 0 60px rgba(255,179,71,0.15), 0 2px 4px rgba(0,0,0,0.5);
     letter-spacing: 12px;
   }
   .header p {
-    font-size: 0.95rem; color: #9a80c0; margin-top: 8px;
+    font-size: 0.95rem; color: #c0906a; margin-top: 8px;
     letter-spacing: 4px;
   }
   .header .sub {
-    font-size: 0.8rem; color: #7a60a0; margin-top: 4px;
+    font-size: 0.8rem; color: #9a7050; margin-top: 4px;
     letter-spacing: 2px;
   }
 
@@ -85,24 +85,24 @@
   .bagua {
     width: 200px; height: 200px;
     border-radius: 50%;
-    border: 2px solid rgba(200,160,255,0.3);
-    background: radial-gradient(circle, #1e0a35 30%, #140828 100%);
+    border: 2px solid rgba(220,170,100,0.3);
+    background: radial-gradient(circle, #1e0c18 30%, #150815 100%);
     display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 0 40px rgba(160,100,220,0.2), inset 0 0 30px rgba(160,100,220,0.1);
+    box-shadow: 0 0 40px rgba(220,150,80,0.15), inset 0 0 30px rgba(220,150,80,0.08);
     position: relative;
     overflow: hidden;
   }
   .bagua::before {
     content: '☯';
     font-size: 5rem;
-    color: rgba(200,160,255,0.3);
-    text-shadow: 0 0 20px rgba(200,160,255,0.2);
+    color: rgba(220,170,100,0.35);
+    text-shadow: 0 0 20px rgba(220,170,100,0.2);
   }
 
   .bagua-ring {
     position: absolute;
     width: 100%; height: 100%;
-    border: 1px solid rgba(200,160,255,0.15);
+    border: 1px solid rgba(220,170,100,0.15);
     border-radius: 50%;
     animation: slowSpin 30s linear infinite;
   }
@@ -112,7 +112,7 @@
     top: -12px; left: 50%;
     transform: translateX(-50%);
     font-size: 0.9rem;
-    color: rgba(200,160,255,0.35);
+    color: rgba(220,170,100,0.35);
     letter-spacing: 6px;
     white-space: nowrap;
   }
@@ -130,7 +130,7 @@
     to { transform: rotate(360deg); }
   }
   .spinning .bagua {
-    box-shadow: 0 0 60px rgba(160,100,220,0.5), inset 0 0 40px rgba(160,100,220,0.25);
+    box-shadow: 0 0 60px rgba(220,150,80,0.4), inset 0 0 40px rgba(220,150,80,0.2);
   }
   .spinning .bagua-ring {
     animation: fastSpin 1s linear infinite;
@@ -141,7 +141,7 @@
   }
 
   .hint {
-    font-size: 0.9rem; color: #9a80c0; margin-bottom: 20px;
+    font-size: 0.9rem; color: #c0906a; margin-bottom: 20px;
     letter-spacing: 2px;
     animation: pulse 2s ease-in-out infinite;
   }
@@ -151,19 +151,19 @@
   }
 
   .btn {
-    background: linear-gradient(135deg, #3a1a5a, #5a3a8a, #3a1a5a);
-    color: #f0e6ff; border: 1px solid rgba(200,160,255,0.3);
+    background: linear-gradient(135deg, #4a2040, #6a3060, #4a2040);
+    color: #fff0e6; border: 1px solid rgba(220,170,100,0.35);
     padding: 14px 48px;
     font-family: 'Noto Serif SC', serif;
     font-size: 1.15rem; font-weight: 700;
     border-radius: 50px; cursor: pointer;
     letter-spacing: 6px;
-    box-shadow: 0 4px 20px rgba(160,100,220,0.25);
+    box-shadow: 0 4px 20px rgba(220,150,80,0.2);
     transition: all 0.3s;
     margin-top: 10px;
   }
   .btn:hover {
-    box-shadow: 0 6px 30px rgba(160,100,220,0.45);
+    box-shadow: 0 6px 30px rgba(220,150,80,0.35);
     transform: translateY(-2px);
   }
   .btn:active { transform: translateY(0); }
@@ -172,7 +172,7 @@
   /* 光芒闪现 */
   .flash {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: radial-gradient(circle, rgba(200,160,255,0.3), transparent 70%);
+    background: radial-gradient(circle, rgba(255,200,100,0.3), transparent 70%);
     z-index: 5; pointer-events: none;
     opacity: 0; animation: flashOnce 0.6s ease-out forwards;
   }
@@ -192,8 +192,8 @@
   .result.show { display: block; opacity: 1; transform: translateY(0); }
 
   .result-card {
-    background: linear-gradient(135deg, #150a28, #1e1035, #150a28);
-    border: 1.5px solid rgba(200,160,255,0.25);
+    background: linear-gradient(135deg, #180a12, #221018, #180a12);
+    border: 1.5px solid rgba(220,170,100,0.25);
     border-radius: 16px;
     padding: 30px 24px;
     position: relative; overflow: hidden;
@@ -202,14 +202,14 @@
     content: '';
     position: absolute; top: -50%; left: -50%;
     width: 200%; height: 200%;
-    background: radial-gradient(circle at 50% 50%, rgba(200,160,255,0.03), transparent 60%);
+    background: radial-gradient(circle at 50% 50%, rgba(220,170,100,0.03), transparent 60%);
   }
 
   .result-num {
     text-align: center;
     font-family: 'Ma Shan Zheng', cursive;
     font-size: 1.3rem;
-    color: #9a80c0;
+    color: #c0906a;
     margin-bottom: 6px;
   }
 
@@ -220,26 +220,26 @@
     letter-spacing: 4px;
   }
   .type-大吉 { color: #ffd700; text-shadow: 0 0 12px rgba(255,215,0,0.5); }
-  .type-上吉 { color: #e0a0ff; text-shadow: 0 0 10px rgba(224,160,255,0.4); }
-  .type-中吉 { color: #c9a0ff; text-shadow: 0 0 10px rgba(200,160,255,0.3); }
-  .type-中平 { color: #a090c0; }
-  .type-中下 { color: #7a6a9a; }
-  .type-下下 { color: #5a4a7a; }
+  .type-上吉 { color: #ffb347; text-shadow: 0 0 10px rgba(255,179,71,0.4); }
+  .type-中吉 { color: #d4a0e0; text-shadow: 0 0 10px rgba(212,160,224,0.3); }
+  .type-中平 { color: #c0906a; }
+  .type-中下 { color: #8a6a50; }
+  .type-下下 { color: #6a5040; }
 
   .result-gua {
     text-align: center; font-size: 0.9rem;
-    color: #7a60a0; margin-bottom: 16px;
+    color: #9a7050; margin-bottom: 16px;
     letter-spacing: 2px;
   }
 
   .divider {
     width: 60%; height: 1px; margin: 0 auto 16px;
-    background: linear-gradient(90deg, transparent, rgba(200,160,255,0.3), transparent);
+    background: linear-gradient(90deg, transparent, rgba(220,170,100,0.3), transparent);
   }
 
   .poem {
     text-align: center; line-height: 2.4;
-    font-size: 1.2rem; color: #f0e6ff;
+    font-size: 1.2rem; color: #fff0e6;
     font-family: 'Ma Shan Zheng', cursive;
     letter-spacing: 3px; margin-bottom: 16px;
   }
@@ -250,47 +250,47 @@
     padding: 16px 18px; margin-top: 12px;
   }
   .interpretation h3 {
-    color: #c9a0ff; font-size: 1rem;
+    color: #d4a0e0; font-size: 1rem;
     margin-bottom: 8px; letter-spacing: 4px;
   }
   .interpretation p {
-    font-size: 0.92rem; line-height: 1.9; color: #a090c0;
+    font-size: 0.92rem; line-height: 1.9; color: #c0906a;
   }
 
   .detail-grid {
     display: grid; grid-template-columns: 1fr 1fr;
     gap: 8px 16px; margin-top: 12px;
   }
-  .detail-item { font-size: 0.85rem; color: #7a60a0; }
-  .detail-item span { color: #a090c0; }
+  .detail-item { font-size: 0.85rem; color: #9a7050; }
+  .detail-item span { color: #c0906a; }
 
   .btn-again {
     display: block; margin: 24px auto 40px;
     background: transparent;
-    border: 1.5px solid rgba(200,160,255,0.3);
-    color: #c9a0ff;
+    border: 1.5px solid rgba(220,170,100,0.3);
+    color: #d4a0e0;
     padding: 10px 36px;
     font-family: 'Noto Serif SC', serif;
     font-size: 0.95rem;
     border-radius: 50px; cursor: pointer;
     letter-spacing: 4px; transition: all 0.3s;
   }
-  .btn-again:hover { background: rgba(200,160,255,0.1); }
+  .btn-again:hover { background: rgba(220,170,100,0.08); }
 
   .back-link {
     position: fixed; top: 16px; left: 16px;
-    color: #7a60a0; font-size: 0.85rem;
+    color: #9a7050; font-size: 0.85rem;
     text-decoration: none; letter-spacing: 2px;
     z-index: 10; transition: color 0.3s;
   }
-  .back-link:hover { color: #c9a0ff; }
+  .back-link:hover { color: #d4a0e0; }
   .nav-link-r {
     position: fixed; top: 16px; right: 16px;
-    color: #7a60a0; font-size: 0.85rem;
+    color: #9a7050; font-size: 0.85rem;
     text-decoration: none; letter-spacing: 2px;
     z-index: 10; transition: color 0.3s;
   }
-  .nav-link-r:hover { color: #c9a0ff; }
+  .nav-link-r:hover { color: #d4a0e0; }
 
   @media (max-width: 480px) {
     .header h1 { font-size: 2.4rem; letter-spacing: 8px; }
