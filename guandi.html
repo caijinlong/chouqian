@@ -89,7 +89,7 @@
 
   .blade-wrapper {
     position: relative; cursor: pointer;
-    width: 200px; height: 220px;
+    width: 220px; height: 240px;
     margin-bottom: 20px;
     transition: transform 0.2s;
   }
@@ -97,7 +97,7 @@
   .blade-wrapper:active { transform: scale(0.95); }
 
   .blade-circle {
-    width: 200px; height: 200px;
+    width: 220px; height: 220px;
     border-radius: 50%;
     border: 3px solid rgba(255,215,0,0.35);
     background: radial-gradient(circle, #1a0e00 20%, #120a00 100%);
@@ -107,11 +107,12 @@
     overflow: hidden;
   }
   .blade-icon {
-    font-size: 4.5rem;
-    text-shadow: 0 0 15px rgba(255,215,0,0.3);
+    height: 190px;
+    width: auto;
     user-select: none;
     position: relative;
     z-index: 2;
+    filter: drop-shadow(0 0 12px rgba(255,215,0,0.4)) drop-shadow(0 0 25px rgba(255,150,0,0.2));
   }
   .blade-circle::after {
     content: '';
@@ -145,6 +146,7 @@
   }
   .shaking .blade-icon {
     animation: shakeIcon 0.12s ease-in-out infinite alternate;
+    filter: drop-shadow(0 0 20px rgba(255,215,0,0.7)) drop-shadow(0 0 40px rgba(255,150,0,0.4));
   }
   @keyframes shakeIcon {
     0% { transform: rotate(-8deg); }
@@ -315,7 +317,66 @@
   <div class="blade-area" id="bladeArea">
     <div class="blade-wrapper" id="bladeWrapper" onclick="drawLot()">
       <div class="blade-circle">
-        <span class="blade-icon">⚔</span>
+        <svg class="blade-icon" viewBox="-5 0 80 200" xmlns="http://www.w3.org/2000/svg">
+          <!-- === 青龙偃月刀 === -->
+          <!-- 笔直长杆 -->
+          <line x1="32" y1="198" x2="32" y2="72" stroke="url(#poleGrad)" stroke-width="5" stroke-linecap="round"/>
+          <!-- 杆底铁尖 -->
+          <polygon points="32,200 29,194 35,194" fill="#8a7030"/>
+          <!-- 杆身铜箍 -->
+          <rect x="28" y="178" width="8" height="3" rx="1" fill="#b8860b" opacity="0.7"/>
+          <rect x="28" y="155" width="8" height="3" rx="1" fill="#b8860b" opacity="0.6"/>
+          <rect x="28" y="132" width="8" height="3" rx="1" fill="#b8860b" opacity="0.5"/>
+          <rect x="28" y="109" width="8" height="3" rx="1" fill="#b8860b" opacity="0.5"/>
+          <rect x="28" y="88" width="8" height="3" rx="1" fill="#b8860b" opacity="0.4"/>
+          <!-- 护手横档 -->
+          <rect x="22" y="70" width="20" height="5" rx="2.5" fill="#8a6a20" stroke="#b8860b" stroke-width="0.6"/>
+          <!-- 偃月刀刃 —— 竖直方向，背脊贴杆，刃口微向右弧，刀尖左翘 -->
+          <path d="M 32 70
+                   C 31 55, 30 40, 32 24
+                   C 33 16, 32 10, 28 5
+                   L 27 4
+                   C 36 4, 46 16, 47 30
+                   C 47 46, 42 60, 36 68
+                   Z"
+                fill="url(#bladeGrad)" stroke="#a09040" stroke-width="0.8"/>
+          <!-- 刀锋弧线高光（右侧刃口） -->
+          <path d="M 27 4 C 30 12, 38 22, 42 32 C 44 44, 42 58, 36 68"
+                stroke="rgba(255,255,255,0.5)" stroke-width="0.7" fill="none"/>
+          <!-- 刀背脊线（左侧，贴近杆） -->
+          <path d="M 32 70 C 31 55, 30 40, 32 24 C 33 16, 32 10, 28 5 L 27 4"
+                stroke="#706020" stroke-width="1.5" fill="none" opacity="0.5"/>
+          <!-- 刀尖高光 -->
+          <path d="M 27 4 C 34 5, 40 12, 42 18 C 38 12, 32 6, 27 4 Z"
+                fill="rgba(255,255,240,0.45)"/>
+          <!-- 刀面龙纹 -->
+          <path d="M 35 58 C 38 48, 44 36, 48 26"
+                stroke="#c0a040" stroke-width="0.5" fill="none" opacity="0.3"/>
+          <path d="M 37 52 C 40 44, 46 34, 50 24"
+                stroke="#c0a040" stroke-width="0.4" fill="none" opacity="0.2"/>
+          <!-- 红缨穗 -->
+          <path d="M 24 74 Q 18 88, 20 104" stroke="#cc2222" stroke-width="2.2" fill="none" stroke-linecap="round" opacity="0.9"/>
+          <path d="M 25 75 Q 20 90, 23 106" stroke="#ee3333" stroke-width="1.6" fill="none" stroke-linecap="round" opacity="0.7"/>
+          <path d="M 26 74 Q 22 89, 26 102" stroke="#cc1111" stroke-width="1.8" fill="none" stroke-linecap="round" opacity="0.6"/>
+          <circle cx="20" cy="105" r="2.2" fill="#cc2222" opacity="0.7"/>
+          <circle cx="23" cy="107" r="2" fill="#ee3333" opacity="0.6"/>
+          <circle cx="26" cy="103" r="1.8" fill="#cc1111" opacity="0.5"/>
+          <!-- 渐变 -->
+          <defs>
+            <linearGradient id="bladeGrad" x1="32" y1="70" x2="50" y2="4" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#6a5a30"/>
+              <stop offset="25%" stop-color="#b0b0b0"/>
+              <stop offset="55%" stop-color="#dcdcdc"/>
+              <stop offset="85%" stop-color="#c0c0c0"/>
+              <stop offset="100%" stop-color="#909090"/>
+            </linearGradient>
+            <linearGradient id="poleGrad" x1="32" y1="198" x2="32" y2="72" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#3a1e00"/>
+              <stop offset="50%" stop-color="#6b4410"/>
+              <stop offset="100%" stop-color="#8a6a20"/>
+            </linearGradient>
+          </defs>
+        </svg>
       </div>
       <div class="blade-text">青龙偃月</div>
     </div>
