@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>观音灵签</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&family=Ma+Shan+Zheng&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    min-height: 100vh;
+    background: #1a0a0a;
+    color: #f5e6c8;
+    font-family: 'Noto Serif SC', serif;
+    overflow-x: hidden;
+  }
+
+  /* 背景 */
+  .bg-layer {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(ellipse at 50% 30%, #3a1515 0%, #1a0a0a 70%);
+    z-index: 0;
+  }
+
+  /* 烟雾粒子 */
+  .smoke-container {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 1; overflow: hidden;
+  }
+  .smoke {
+    position: absolute;
+    width: 6px; height: 6px;
+    background: radial-gradient(circle, rgba(255,200,100,0.3), transparent);
+    border-radius: 50%;
+    animation: smokeRise linear infinite;
+  }
+  @keyframes smokeRise {
+    0% { transform: translateY(0) scale(1); opacity: 0.6; }
+    50% { opacity: 0.3; }
+    100% { transform: translateY(-100vh) scale(3); opacity: 0; }
+  }
+
+  .container {
+    position: relative; z-index: 2;
+    max-width: 600px; margin: 0 auto; padding: 20px;
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: flex-start;
+  }
+
+  /* 标题 */
+  .header {
+    text-align: center; margin-top: 30px; margin-bottom: 10px;
+  }
+  .header h1 {
+    font-family: 'Ma Shan Zheng', cursive;
+    font-size: 3rem;
+    color: #ffd700;
+    text-shadow: 0 0 20px rgba(255,215,0,0.4), 0 2px 4px rgba(0,0,0,0.5);
+    letter-spacing: 12px;
+  }
+  .header p {
+    font-size: 0.95rem; color: #c9a96e; margin-top: 8px;
+    letter-spacing: 4px;
+  }
+
+  /* 签筒区域 */
+  .oracle-area {
+    display: flex; flex-direction: column; align-items: center;
+    margin-top: 20px; width: 100%;
+  }
+
+  /* 签筒 */
+  .tube-wrapper {
+    position: relative; cursor: pointer;
+    width: 160px; height: 240px;
+    margin-bottom: 20px;
+    transition: transform 0.15s;
+  }
+  .tube-wrapper:hover { transform: scale(1.03); }
+  .tube-wrapper:active { transform: scale(0.97); }
+
+  .tube {
+    width: 160px; height: 240px;
+    position: relative;
+  }
+  .tube-body {
+    position: absolute; bottom: 0;
+    width: 100%; height: 200px;
+    background: linear-gradient(135deg, #8B4513 0%, #A0522D 30%, #8B4513 60%, #6B3410 100%);
+    border-radius: 12px 12px 20px 20px;
+    border: 2px solid #d4a44a;
+    box-shadow: inset 0 0 30px rgba(0,0,0,0.4), 0 8px 32px rgba(0,0,0,0.6);
+    overflow: hidden;
+  }
+  .tube-body::before {
+    content: '签'; position: absolute;
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+    font-family: 'Ma Shan Zheng', cursive;
+    font-size: 3.5rem; color: #ffd700;
+    text-shadow: 0 0 10px rgba(255,215,0,0.3);
+    opacity: 0.8;
+  }
+  .tube-body::after {
+    content: '';
+    position: absolute; top: 0; left: 30%;
+    width: 8%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+  }
+  .tube-rim {
+    position: absolute; top: 160px;
+    width: 100%; height: 20px;
+    background: linear-gradient(180deg, #d4a44a, #b8860b, #d4a44a);
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  }
+
+  /* 签筒里的签 */
+  .sticks {
+    position: absolute; top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 120px; height: 180px;
+  }
+  .stick {
+    position: absolute; bottom: 40px;
+    width: 6px; height: 150px;
+    border-radius: 3px 3px 1px 1px;
+    transform-origin: bottom center;
+  }
+
+  /* 摇签动画 */
+  .shaking .stick {
+    animation: shakeStick 0.15s ease-in-out infinite alternate;
+  }
+  @keyframes shakeStick {
+    0% { transform: rotate(var(--base-rot, 0deg)) translateX(-2px); }
+    100% { transform: rotate(var(--base-rot, 0deg)) translateX(2px); }
+  }
+  .shaking .tube-wrapper {
+    animation: shakeTube 0.1s ease-in-out infinite alternate;
+  }
+  @keyframes shakeTube {
+    0% { transform: rotate(-2deg); }
+    100% { transform: rotate(2deg); }
+  }
+
+  /* 掉出的签 */
+  .falling-stick {
+    position: absolute;
+    width: 8px; height: 160px;
+    background: linear-gradient(180deg, #ffe4b5, #deb887, #d2a679);
+    border-radius: 4px;
+    z-index: 10;
+    animation: fallOut 1s ease-in forwards;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+  @keyframes fallOut {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    60% { transform: translateY(200px) rotate(40deg); opacity: 1; }
+    100% { transform: translateY(350px) rotate(60deg); opacity: 0; }
+  }
+
+  .hint {
+    font-size: 0.9rem; color: #c9a96e; margin-bottom: 20px;
+    letter-spacing: 2px;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+  }
+
+  .btn {
+    background: linear-gradient(135deg, #b8860b, #daa520, #b8860b);
+    color: #1a0a0a; border: none;
+    padding: 14px 48px;
+    font-family: 'Noto Serif SC', serif;
+    font-size: 1.15rem; font-weight: 700;
+    border-radius: 50px; cursor: pointer;
+    letter-spacing: 6px;
+    box-shadow: 0 4px 20px rgba(218,165,32,0.3);
+    transition: all 0.3s;
+    margin-top: 10px;
+  }
+  .btn:hover {
+    box-shadow: 0 6px 30px rgba(218,165,32,0.5);
+    transform: translateY(-2px);
+  }
+  .btn:active { transform: translateY(0); }
+  .btn:disabled {
+    opacity: 0.5; cursor: not-allowed; transform: none;
+  }
+
+  /* 结果区 */
+  .result {
+    width: 100%;
+    max-width: 520px;
+    margin-top: 30px;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s ease;
+    display: none;
+  }
+  .result.show {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .result-card {
+    background: linear-gradient(135deg, #2a1010, #3a1818, #2a1010);
+    border: 2px solid #d4a44a;
+    border-radius: 16px;
+    padding: 30px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .result-card::before {
+    content: '';
+    position: absolute; top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(circle at 50% 50%, rgba(255,215,0,0.03), transparent 60%);
+  }
+
+  .result-num {
+    text-align: center;
+    font-family: 'Ma Shan Zheng', cursive;
+    font-size: 1.3rem;
+    color: #c9a96e;
+    margin-bottom: 6px;
+  }
+
+  .result-type {
+    text-align: center;
+    font-size: 1.6rem;
+    font-weight: 900;
+    margin-bottom: 16px;
+    letter-spacing: 4px;
+  }
+  .type-上上 { color: #ff4500; text-shadow: 0 0 12px rgba(255,69,0,0.4); }
+  .type-上吉 { color: #ff6347; text-shadow: 0 0 10px rgba(255,99,71,0.3); }
+  .type-中吉 { color: #ffa500; text-shadow: 0 0 10px rgba(255,165,0,0.3); }
+  .type-中平 { color: #daa520; }
+  .type-中下 { color: #a0a0a0; }
+  .type-下下 { color: #808080; }
+
+  .result-story {
+    text-align: center;
+    font-size: 0.9rem;
+    color: #a08050;
+    margin-bottom: 16px;
+    letter-spacing: 2px;
+  }
+
+  .divider {
+    width: 60%; height: 1px; margin: 0 auto 16px;
+    background: linear-gradient(90deg, transparent, #d4a44a, transparent);
+  }
+
+  .poem {
+    text-align: center;
+    line-height: 2.4;
+    font-size: 1.2rem;
+    color: #f5e6c8;
+    font-family: 'Ma Shan Zheng', cursive;
+    letter-spacing: 3px;
+    margin-bottom: 16px;
+  }
+
+  .interpretation {
+    background: rgba(0,0,0,0.3);
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-top: 12px;
+  }
+  .interpretation h3 {
+    color: #d4a44a; font-size: 1rem;
+    margin-bottom: 8px; letter-spacing: 4px;
+  }
+  .interpretation p {
+    font-size: 0.92rem;
+    line-height: 1.9;
+    color: #c9a96e;
+  }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 16px;
+    margin-top: 12px;
+  }
+  .detail-item {
+    font-size: 0.85rem; color: #a08050;
+  }
+  .detail-item span { color: #c9a96e; }
+
+  .btn-again {
+    display: block;
+    margin: 24px auto 40px;
+    background: transparent;
+    border: 1.5px solid #d4a44a;
+    color: #d4a44a;
+    padding: 10px 36px;
+    font-family: 'Noto Serif SC', serif;
+    font-size: 0.95rem;
+    border-radius: 50px;
+    cursor: pointer;
+    letter-spacing: 4px;
+    transition: all 0.3s;
+  }
+  .btn-again:hover {
+    background: rgba(212,164,74,0.1);
+  }
+
+  /* 响应式 */
+  @media (max-width: 480px) {
+    .header h1 { font-size: 2.4rem; letter-spacing: 8px; }
+    .poem { font-size: 1.1rem; }
+    .result-card { padding: 24px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-layer"></div>
+<div class="smoke-container" id="smokeContainer"></div>
+
+<div class="container">
+  <div class="header">
+    <h1>观音灵签</h1>
+    <p>诚心祈求 · 佛祖指引</p>
+  </div>
+
+  <div class="oracle-area" id="oracleArea">
+    <div class="tube-wrapper" id="tubeWrapper" onclick="drawLot()">
+      <div class="tube">
+        <div class="sticks" id="sticks"></div>
+        <div class="tube-rim"></div>
+        <div class="tube-body"></div>
+      </div>
+    </div>
+    <p class="hint" id="hint">点击签筒 · 诚心摇签</p>
+    <button class="btn" onclick="drawLot()" id="drawBtn">求 签</button>
+  </div>
+
+  <div class="result" id="result"></div>
+</div>
+
+<script>
+// 生成签筒里的签
+const sticksEl = document.getElementById('sticks');
+const stickColors = ['#ffe4b5','#f5deb3','#deb887','#d2b48c','#e8d5a9','#f0e0c0'];
+for (let i = 0; i < 18; i++) {
+  const s = document.createElement('div');
+  s.className = 'stick';
+  const rot = (i - 9) * 3.5 + (Math.random() * 3 - 1.5);
+  s.style.cssText = `
+    left: ${48 + i * 1.4}px;
+    background: linear-gradient(180deg, ${stickColors[i % stickColors.length]}, #c9a06e);
+    --base-rot: ${rot}deg;
+    transform: rotate(${rot}deg);
+    height: ${135 + Math.random() * 25}px;
+  `;
+  sticksEl.appendChild(s);
+}
+
+// 烟雾
+const smokeCtn = document.getElementById('smokeContainer');
+for (let i = 0; i < 15; i++) {
+  const p = document.createElement('div');
+  p.className = 'smoke';
+  p.style.cssText = `
+    left: ${Math.random() * 100}%;
+    bottom: ${Math.random() * 20}%;
+    width: ${4 + Math.random() * 6}px;
+    height: ${4 + Math.random() * 6}px;
+    animation-duration: ${6 + Math.random() * 8}s;
+    animation-delay: ${Math.random() * 6}s;
+  `;
+  smokeCtn.appendChild(p);
+}
+
+// ====== 100 签数据 ======
+const lots = [
+  {num:1,title:"开天辟地",type:"上上",poem:["日出便见风云散","光明清净照世间","一向前途通大道","万事清吉保平安"],story:"古人：甲子",jie:"云开见日之兆。凡事大吉。"},
+  {num:2,title:"姜太公遇文王",type:"上上",poem:["鲸鱼未变守江河","不可升腾更望高","异日峥嵘身显贵","莫嫌疏拙隐林幽"],story:"古人：姜公",jie:"潜龙勿用之象。宜守待时。"},
+  {num:3,title:"董永遇仙",type:"下下",poem:["临风冒雨去还乡","正是其身似燕儿","衔得泥来欲作垒","到头垒坏复须泥"],story:"古人：董永",jie:"劳而无功之象。凡事宜慎。"},
+  {num:4,title:"玄德牧牛",type:"上平",poem:["千年古镜复重圆","女再求夫男再婚","自此门庭重改换","更添福禄在儿孙"],story:"古人：刘备",jie:"否极泰来之象。凡事先难后易。"},
+  {num:5,title:"刘晨遇仙",type:"中吉",poem:["一锄掘地要求泉","努力求之亦偶然","莫谓营求无甚苦","此中自有透机关"],story:"古人：刘晨",jie:"勤劳有成之象。凡事努力可成。"},
+  {num:6,title:"仁贵遇主",type:"上吉",poem:["投身岩下铜鸟居","须是还他大丈夫","一举首登龙虎榜","十年身到凤凰衢"],story:"古人：薛仁贵",jie:"一举成名之象。凡事大吉。"},
+  {num:7,title:"苏秦不第",type:"中平",poem:["奔波阵阵任风吹","久客他乡未得归","只恐音书无过雁","归期杳杳在天涯"],story:"古人：苏秦",jie:"漂泊不定之象。凡事宜守旧。"},
+  {num:8,title:"姜女寻夫",type:"中下",poem:["茫茫大海一扁舟","上面风浪未曾休","原来只是空中月","却有清光照九州"],story:"古人：孟姜女",jie:"虚花不实之象。凡事多虚少实。"},
+  {num:9,title:"孔明点将",type:"上上",poem:["烟开月出照天涯","仗此忠贞显豪杰","一举首登龙虎日","莫教容易过光阴"],story:"古人：诸葛亮",jie:"月到天心之象。凡事大吉。"},
+  {num:10,title:"庞涓观阵",type:"下下",poem:["石中隐玉有谁知","须得良工琢磨之","若是他山攻别玉","何期方得展身时"],story:"古人：庞涓",jie:"守旧待时之象。凡事不宜急进。"},
+  {num:11,title:"书荐姜维",type:"中平",poem:["书中有画画中诗","尘世纷纷总不知","一事分明大吉利","只恐心高不肯为"],story:"古人：姜维",jie:"眼前有利之象。宜谦虚行事。"},
+  {num:12,title:"武吉遇师",type:"上吉",poem:["否去泰来咫尺间","暂交君子出于山","若逢虎兔佳音至","一切灾殃总不难"],story:"古人：武吉",jie:"苦尽甘来之象。凡事皆吉。"},
+  {num:13,title:"罗通拜帅",type:"上平",poem:["自小生在富贵家","眼前万事总奢华","蒙君赐紫金腰带","四海称扬尽荣夸"],story:"古人：罗通",jie:"显达荣华之象。凡事如意。"},
+  {num:14,title:"子牙收北海",type:"中平",poem:["宛如仙鹤出凡笼","脱得凡笼路路通","南北东西无阻隔","任君直上九霄宫"],story:"古人：姜子牙",jie:"脱困高飞之象。凡事通达。"},
+  {num:15,title:"苏秦得志",type:"中平",poem:["行人上岭又下岭","心中仔细难分明","若遇虎蛇循旧路","一条大道定光明"],story:"古人：苏秦",jie:"上下不定之象。凡事宜守旧。"},
+  {num:16,title:"叶梦熊朝圣",type:"上上",poem:["愁眉思虑暂时开","启出云霄喜自来","宛如粪土中藏玉","良工一举出尘埃"],story:"古人：叶梦熊",jie:"枯木逢春之象。凡事皆吉。"},
+  {num:17,title:"话梅止渴",type:"中平",poem:["莫听闲言与是非","晨昏只好念阿弥","若将狂话来相劝","谨慎应知是与非"],story:"古人：曹操",jie:"修身养性之象。凡事宜静不宜动。"},
+  {num:18,title:"曹操得徐庶",type:"上吉",poem:["金乌西坠兔东升","日夜循环至古今","僧道得知无阻隔","士人宜用心存仁"],story:"古人：曹操",jie:"日月循环之象。凡事宜积善。"},
+  {num:19,title:"子仪封王",type:"上上",poem:["急水滩头放船归","风波作浪欲何为","若能稳坐舟中看","一到江河平静时"],story:"古人：郭子仪",jie:"风浪过后之象。凡事安泰。"},
+  {num:20,title:"姜太公遇文王",type:"上上",poem:["当春久雨喜开晴","玉兔金乌渐渐明","旧事消散新事遂","看看一跳过龙门"],story:"古人：姜太公",jie:"雨过天晴之象。凡事大吉。"},
+  {num:21,title:"李旦复国",type:"上吉",poem:["阴阳道合总由天","女嫁男婚喜自然","但见龙蛇相会日","不须疑虑两相全"],story:"古人：李旦",jie:"阴阳和合之象。婚姻大吉。"},
+  {num:22,title:"六郎逢救",type:"上吉",poem:["旱时田里尽枯焦","谢天甘雨落一宵","花果草芽俱润泽","始知一雨值千金"],story:"古人：杨六郎",jie:"久旱逢甘之象。凡事遂意。"},
+  {num:23,title:"怀德招亲",type:"上平",poem:["欲求好事喜相连","自有佳期在目前","粗看眼前难随意","细看须知在后边"],story:"古人：薛怀德",jie:"先难后易之象。凡事耐心可成。"},
+  {num:24,title:"殷纣王乱政",type:"下下",poem:["不成理论不成家","冷笑嗤人似嘴巴","子有不成还有败","恰如残月被云遮"],story:"古人：殷纣王",jie:"阴晴不定之象。凡事不利。"},
+  {num:25,title:"伯牙访友",type:"中平",poem:["过了忧危事几重","久间音信两相通","深山虎啸风声起","须知月被黑云朦"],story:"古人：俞伯牙",jie:"险中有吉之象。凡事宜谨慎。"},
+  {num:26,title:"钟馗得道",type:"中平",poem:["上下传来事转虚","何须切切问前途","须知目下遭残运","恐怕家中有叹吁"],story:"古人：钟馗",jie:"运势低迷之象。凡事宜忍耐。"},
+  {num:27,title:"刘基谏主",type:"上吉",poem:["一轮明月正当天","万里青云拥上前","虽然圆满十分足","只恐阴晴又不全"],story:"古人：刘伯温",jie:"月满则亏之象。凡事盛极宜谦。"},
+  {num:28,title:"李后寻包",type:"中下",poem:["东边月上正清辉","几处行人独自归","路遇残花空自叹","满天风雨近黄昏"],story:"古人：李后",jie:"日落西山之象。凡事宜守不宜进。"},
+  {num:29,title:"赵子龙救主",type:"上平",poem:["宝剑出匣耀光明","在匣何曾有用处","只须贵人来提拔","万事通泰尽亨通"],story:"古人：赵子龙",jie:"宝剑出匣之象。凡事遇贵人则吉。"},
+  {num:30,title:"棋盘大会",type:"中平",poem:["一片无暇白玉堂","今生须得几圆光","一年初复一年事","天赐麟儿福满堂"],story:"古人：卫青",jie:"守成之象。凡事平稳。"},
+  {num:31,title:"佛印会东坡",type:"上吉",poem:["清闲无是与无非","莺自啼花自开","逍遥自在无拘束","随时随地乐安排"],story:"古人：苏东坡",jie:"自在逍遥之象。凡事顺遂。"},
+  {num:32,title:"刘备求贤",type:"中平",poem:["前途功事未能知","疑虑交加总是虚","须信更深方得见","莫将心事乱如丝"],story:"古人：刘备",jie:"迷雾重重之象。凡事耐心等待。"},
+  {num:33,title:"韩信独立",type:"中下",poem:["内事须防外事侵","暗地虚惊枉劳心","殷勤作福无灾侵","此乃人间难得经"],story:"古人：韩信",jie:"暗箭难防之象。凡事宜防小人。"},
+  {num:34,title:"桃园结义",type:"上上",poem:["行藏出入礼义恭","敬人无怠始终同","若能作事诚心在","何必忧疑东与西"],story:"古人：刘关张",jie:"诚信结交之象。凡事以诚待人。"},
+  {num:35,title:"唐僧取经",type:"中平",poem:["千万里路去求经","别离乡井不辞辛","只须耐得风霜苦","满眼黄金万两呈"],story:"古人：唐三藏",jie:"经历磨难之象。凡事辛苦有成。"},
+  {num:36,title:"五丈原禳星",type:"中下",poem:["过河须用筏和船","彼岸只在眼前边","莫听旁人闲说事","自行便有贵人缘"],story:"古人：诸葛亮",jie:"渡河寻路之象。凡事自有出路。"},
+  {num:37,title:"李靖归山",type:"上吉",poem:["欲待求财要费心","岂知财宝在前程","幸逢贵人多指引","萍水相逢却有情"],story:"古人：李靖",jie:"贵人相助之象。凡事遇贵则吉。"},
+  {num:38,title:"何文秀遇难",type:"中下",poem:["月照天书静处期","忽遭云雾又昏迷","宽心等候清风起","一点灵光万里辉"],story:"古人：何文秀",jie:"云遮月暗之象。凡事待时而动。"},
+  {num:39,title:"姜维邓艾斗阵",type:"中下",poem:["天边鸦鹊噪声声","行路之人心不宁","莫恐中间有险阻","斯时心志坚如城"],story:"古人：姜维",jie:"前路多阻之象。凡事坚守可过。"},
+  {num:40,title:"姜维斗阵",type:"中平",poem:["倒身退步莫迟疑","中有一线大光辉","须信更深方才见","明月应知照五湖"],story:"古人：姜维",jie:"退一步海阔天空之象。凡事宜退守。"},
+  {num:41,title:"刘秀走国",type:"中平",poem:["无限好事在今朝","恰如花开对小桥","须知一阵风浪过","自有晴天万里遥"],story:"古人：刘秀",jie:"风浪暂时之象。凡事终将好转。"},
+  {num:42,title:"目莲救母",type:"上吉",poem:["君归大道可通行","一路前途无险情","万事如今皆遂意","目前凡事尽光明"],story:"古人：目莲",jie:"坦途在前之象。凡事顺遂。"},
+  {num:43,title:"行者得道",type:"上平",poem:["天地交泰万物新","事事如意步步春","若得此签非小可","人行中正帝王心"],story:"古人：孙悟空",jie:"天地交泰之象。万事如意。"},
+  {num:44,title:"姜维收姜维",type:"中平",poem:["棋逢敌手不相让","黑白未分两不降","终日苦争无结果","何时方得定阴阳"],story:"古人：姜维",jie:"僵持不下之象。凡事难分胜负。"},
+  {num:45,title:"仁宗遇母",type:"上吉",poem:["温柔自是胜强刚","万两黄金不如情","若遇有缘方可得","莫使此意落空亡"],story:"古人：宋仁宗",jie:"以柔克刚之象。凡事以情动人。"},
+  {num:46,title:"渭水聘贤",type:"上上",poem:["锦上添花色更光","运来禄马喜洋洋","一切谋望皆如意","积善之家大吉昌"],story:"古人：文王",jie:"锦上添花之象。凡事大吉。"},
+  {num:47,title:"梁灏登科",type:"中平",poem:["锻炼千年出匣中","纯钢化作绕指柔","须逢际会方能用","未遇应知且自修"],story:"古人：梁灏",jie:"韬光养晦之象。凡事宜修身待时。"},
+  {num:48,title:"韩信问路",type:"中下",poem:["鸟秋打扫旧巢安","人在危时望故乡","一叶扁舟归大海","行人莫恋在他方"],story:"古人：韩信",jie:"思乡归里之象。凡事宜回归本心。"},
+  {num:49,title:"王祥求鲤",type:"中平",poem:["天寒地冻水成冰","何必贪营受苦辛","待到春风消息至","明媚花开万事新"],story:"古人：王祥",jie:"寒冬待春之象。凡事忍耐等待。"},
+  {num:50,title:"陶朱归隐",type:"中吉",poem:["五湖四海任游行","处处风光满目新","若问前程归宿处","却是安居乐业人"],story:"古人：范蠡",jie:"功成身退之象。凡事知足则安。"},
+  {num:51,title:"孔子论道",type:"上吉",poem:["夫子生来有异才","满腹文章锦绣来","功名富贵天注定","不须忧虑自安排"],story:"古人：孔子",jie:"天纵之才之象。凡事自有安排。"},
+  {num:52,title:"太白醉酒",type:"中平",poem:["水中月影镜中花","看似有时又似无","莫把虚名来作实","须知一切莫贪图"],story:"古人：李白",jie:"虚幻不实之象。凡事不可贪求。"},
+  {num:53,title:"刘备借荆州",type:"中平",poem:["借来东西且欢欣","须知他日要归还","若将别人为己用","怎知此事不周全"],story:"古人：刘备",jie:"借势用力之象。凡事有借有还。"},
+  {num:54,title:"马超追曹",type:"中吉",poem:["身骑骏马向前行","一路春风伴我程","莫问前途多少路","自然到处有光明"],story:"古人：马超",jie:"快马加鞭之象。凡事宜进取。"},
+  {num:55,title:"包公断案",type:"上平",poem:["天理昭昭不可欺","清官明镜照妖魑","只须一片公心在","是非黑白自分离"],story:"古人：包拯",jie:"公正无私之象。凡事秉公则吉。"},
+  {num:56,title:"六祖得道",type:"上上",poem:["明月清风不用买","高山流水自知音","身在尘世心如镜","菩提本无一物存"],story:"古人：慧能",jie:"明心见性之象。凡事放下则安。"},
+  {num:57,title:"董卓进京",type:"下下",poem:["说是说非风过耳","好衣好禄自然来","君莫记取他年事","一场春梦不须猜"],story:"古人：董卓",jie:"是非缠身之象。凡事宜远是非。"},
+  {num:58,title:"文王问卦",type:"上吉",poem:["阴阳造化本乾坤","顺逆存亡在此分","若得此签皆遂意","管教百事尽称心"],story:"古人：周文王",jie:"阴阳顺和之象。凡事称心如意。"},
+  {num:59,title:"张良退隐",type:"中吉",poem:["功名成就不贪多","急流勇退乐如何","须知世事轮回转","看透浮华自解脱"],story:"古人：张良",jie:"急流勇退之象。凡事知止不殆。"},
+  {num:60,title:"月明先生",type:"中平",poem:["抱琴弹向月明中","几处知音侧耳听","一曲高山流水意","人间难得遇相逢"],story:"古人：钟子期",jie:"知音难觅之象。凡事待有缘人。"},
+  {num:61,title:"苏武牧羊",type:"中下",poem:["日望乡关归不得","天边大雁几时来","须知坚忍终有报","雪化冰消见春回"],story:"古人：苏武",jie:"困境坚守之象。凡事坚忍则吉。"},
+  {num:62,title:"唐明皇游月",type:"中吉",poem:["晚景凄凉早景欢","明月高照在云端","若要此间求佳境","须凭心正事自安"],story:"古人：唐明皇",jie:"月夜清明之象。凡事心正则安。"},
+  {num:63,title:"女娲补天",type:"上平",poem:["天工巧妙补乾坤","莫道人间无至人","五色石头能炼就","一番辛苦一番新"],story:"古人：女娲",jie:"修补圆满之象。凡事努力可成。"},
+  {num:64,title:"马援战场",type:"中下",poem:["路途险阻费周章","前路茫茫不可量","且将心事放宽去","自然到处有祯祥"],story:"古人：马援",jie:"路途坎坷之象。凡事宜放宽心。"},
+  {num:65,title:"韩湘子化叔",type:"上吉",poem:["庭前花开满园春","天上人间各自新","若得此签多福禄","门庭光彩照乾坤"],story:"古人：韩湘子",jie:"花开富贵之象。凡事大吉。"},
+  {num:66,title:"商辂中三元",type:"上上",poem:["一身才学满乾坤","连中三元世所尊","从此青云平步上","光宗耀祖定封恩"],story:"古人：商辂",jie:"三元及第之象。凡事大吉大利。"},
+  {num:67,title:"金星试窦儿",type:"中平",poem:["一条金线秤中求","轻重由来在两头","若问营谋多少利","但看秤上定根由"],story:"古人：窦燕山",jie:"权衡利弊之象。凡事需仔细斟酌。"},
+  {num:68,title:"郭子仪祝寿",type:"上上",poem:["门庭喜气自生光","锦绣堆成满画堂","七子八婿皆显贵","正是人间福寿长"],story:"古人：郭子仪",jie:"福寿满堂之象。凡事大吉。"},
+  {num:69,title:"梅开二度",type:"中吉",poem:["一度花开一度新","枯枝又发再逢春","凡人不识其中意","好运临门莫怀疑"],story:"古人：梅良玉",jie:"否极泰来之象。好运将至。"},
+  {num:70,title:"曹操困境",type:"中下",poem:["一谋一用一翻身","自有天机不负人","莫道前途无好事","须知暗处有光明"],story:"古人：曹操",jie:"困中求变之象。凡事需变通。"},
+  {num:71,title:"文天祥就义",type:"中平",poem:["丹心一片照汗青","留取忠名万古存","虽然眼前多磨难","正气长存天地间"],story:"古人：文天祥",jie:"大义凛然之象。凡事宜守正道。"},
+  {num:72,title:"王昭君出塞",type:"中平",poem:["一身远嫁到他乡","别却亲人泪几行","虽然身在千里外","明月依然照故乡"],story:"古人：王昭君",jie:"远行离别之象。凡事身不由己。"},
+  {num:73,title:"陈桥兵变",type:"上吉",poem:["一朝际会风云起","黄袍加身万姓呼","从此太平天子定","乾坤转运在须臾"],story:"古人：赵匡胤",jie:"时来运转之象。凡事突变大吉。"},
+  {num:74,title:"姜女望夫",type:"中下",poem:["万里长城泪满襟","寒天冻地苦追寻","虽然此去多辛苦","终有团圆慰此心"],story:"古人：孟姜女",jie:"苦尽甘来之象。凡事坚持可成。"},
+  {num:75,title:"伍子胥过昭关",type:"中下",poem:["一夜愁来白了头","千般计较费心谋","若能过得此关去","前程万里不须愁"],story:"古人：伍子胥",jie:"闯关夺隘之象。凡事过关则吉。"},
+  {num:76,title:"扁鹊治病",type:"中吉",poem:["妙手回春有良方","病入膏肓亦无妨","但凡世事需诊治","对症下药保安康"],story:"古人：扁鹊",jie:"妙手回春之象。凡事找对方法则吉。"},
+  {num:77,title:"吕布战三英",type:"中平",poem:["独虎难敌众犬欺","虽然勇猛也堪危","须知好汉架不住","三人同心力量齐"],story:"古人：吕布",jie:"寡不敌众之象。凡事宜合作。"},
+  {num:78,title:"曹植七步成诗",type:"中吉",poem:["才高八斗世间稀","七步成诗众人奇","虽然身陷危难里","急中生智化险夷"],story:"古人：曹植",jie:"急中生智之象。凡事可化险为夷。"},
+  {num:79,title:"愚公移山",type:"中平",poem:["太行王屋两座山","子子孙孙挖不完","只要功夫深似海","铁杵也能磨成针"],story:"古人：愚公",jie:"持之以恒之象。凡事坚持不懈。"},
+  {num:80,title:"廉颇负荆",type:"上平",poem:["负荆请罪诚心改","将相和来国太平","若能低头认己过","风云际会任纵横"],story:"古人：廉颇",jie:"知错能改之象。凡事谦让为上。"},
+  {num:81,title:"风波亭冤死",type:"下下",poem:["忠心报国反遭殃","莫须有罪令人伤","且莫忧愁天有眼","青天白日总重光"],story:"古人：岳飞",jie:"含冤受屈之象。凡事宜忍耐待时。"},
+  {num:82,title:"火烧赤壁",type:"上吉",poem:["东风一起火光天","百万雄兵化灰烟","谋事在人成在天","若得此签事必圆"],story:"古人：周瑜",jie:"借力成事之象。凡事借势则成。"},
+  {num:83,title:"李白醉书",type:"中吉",poem:["醉里挥毫气势豪","文章锦绣冠群曹","人生得意须尽欢","莫使金樽空对月"],story:"古人：李白",jie:"才华横溢之象。凡事宜把握时机。"},
+  {num:84,title:"司马光砸缸",type:"上平",poem:["临危不乱有良谋","一举破缸救幼儿","若遇困境须冷静","自有灵光化解忧"],story:"古人：司马光",jie:"急中生智之象。凡事沉着应对。"},
+  {num:85,title:"西施浣纱",type:"中吉",poem:["美人如玉剑如虹","深藏不露待时逢","一旦风云际会日","从此声名天下闻"],story:"古人：西施",jie:"深藏不露之象。凡事待时而发。"},
+  {num:86,title:"精卫填海",type:"中下",poem:["衔来细石欲填海","志虽可嘉力不从","须知天地自有数","且将此心付春风"],story:"古人：精卫",jie:"心有余力不足之象。凡事量力而行。"},
+  {num:87,title:"鬼谷收徒",type:"中吉",poem:["明师难遇在今朝","不惜千金求一教","若能得遇真传授","管教青出胜于蓝"],story:"古人：鬼谷子",jie:"名师指点之象。凡事宜求教于人。"},
+  {num:88,title:"庄周梦蝶",type:"中平",poem:["是蝶是人两不知","南柯一梦几人迷","世间万事如春梦","何必营营太着急"],story:"古人：庄周",jie:"虚实难辨之象。凡事不宜执着。"},
+  {num:89,title:"大禹治水",type:"上上",poem:["三过家门而不入","一心治水为苍生","功成名就天下定","万世景仰永流名"],story:"古人：大禹",jie:"专心致志之象。凡事全力以赴则成。"},
+  {num:90,title:"项羽自刎",type:"下下",poem:["力拔山兮气盖世","时不利兮骓不逝","虽有万夫不当勇","终因刚愎自用亡"],story:"古人：项羽",jie:"刚愎自用之象。凡事宜听劝谏。"},
+  {num:91,title:"蔡文姬归汉",type:"中吉",poem:["胡笳十八拍声声","归来故国万般情","虽经磨难终有日","拨开云雾见天晴"],story:"古人：蔡文姬",jie:"历尽艰辛终归来之象。凡事终将圆满。"},
+  {num:92,title:"蒙恬修长城",type:"中平",poem:["万里长城万里长","修筑不易费时光","若要成就千秋业","须有坚持不懈心"],story:"古人：蒙恬",jie:"大工程需持久之象。凡事循序渐进。"},
+  {num:93,title:"花木兰从军",type:"上吉",poem:["谁说女子不如男","代父从军美名传","只要胸中有壮志","巾帼何须让须眉"],story:"古人：花木兰",jie:"巾帼不让须眉之象。凡事勇往直前。"},
+  {num:94,title:"管鲍之交",type:"上吉",poem:["知己知彼两相宜","管鲍之交世所稀","若遇良朋须珍惜","同心同德共扶持"],story:"古人：管仲",jie:"知音相遇之象。凡事得良友助。"},
+  {num:95,title:"曹冲称象",type:"中吉",poem:["大象称来妙计生","小儿聪慧世间惊","莫道难题无解法","换个思路便通明"],story:"古人：曹冲",jie:"巧思妙解之象。凡事换个角度。"},
+  {num:96,title:"太公钓鱼",type:"中平",poem:["直钩垂钓渭水滨","愿者上钩非等闲","须知大器晚成日","七十方得遇圣君"],story:"古人：姜太公",jie:"大器晚成之象。凡事耐心等待。"},
+  {num:97,title:"诸葛借东风",type:"上吉",poem:["万事俱备只欠风","东风一到便成功","若能静待天时至","一举功成万事通"],story:"古人：诸葛亮",jie:"万事俱备之象。凡事待时则成。"},
+  {num:98,title:"吉平遇难",type:"下下",poem:["前路茫茫不可行","暗中荆棘满途生","此时切莫轻举动","静待时机再出征"],story:"古人：吉平",jie:"荆棘满途之象。凡事宜静待。"},
+  {num:99,title:"班超投笔",type:"上吉",poem:["投笔从戎志四方","大丈夫当立功场","三十六国皆臣服","万里封侯美名扬"],story:"古人：班超",jie:"弃文从武之象。凡事宜果断决策。"},
+  {num:100,title:"三教谈经",type:"上上",poem:["三教原来是一家","儒释道中各开花","世间万法归一理","心诚则灵莫疑他"],story:"古人：三教圣人",jie:"万法归一之象。凡事心诚则灵。"}
+];
+
+let isDrawing = false;
+
+function drawLot() {
+  if (isDrawing) return;
+  isDrawing = true;
+
+  const btn = document.getElementById('drawBtn');
+  const hint = document.getElementById('hint');
+  const area = document.getElementById('oracleArea');
+  const resultEl = document.getElementById('result');
+
+  btn.disabled = true;
+  hint.textContent = '诚心摇签中...';
+  hint.style.animation = 'none';
+  resultEl.classList.remove('show');
+
+  // 摇签动画
+  area.classList.add('shaking');
+
+  // 播放音效（可选）
+  setTimeout(() => {
+    area.classList.remove('shaking');
+
+    // 落签动画
+    const tube = document.getElementById('tubeWrapper');
+    const rect = tube.getBoundingClientRect();
+    const falling = document.createElement('div');
+    falling.className = 'falling-stick';
+    falling.style.left = (rect.left + rect.width / 2 - 4) + 'px';
+    falling.style.top = (rect.top + 20) + 'px';
+    document.body.appendChild(falling);
+
+    setTimeout(() => {
+      falling.remove();
+      // 显示结果
+      const lot = lots[Math.floor(Math.random() * lots.length)];
+      showResult(lot);
+      isDrawing = false;
+      btn.disabled = false;
+      hint.textContent = '点击签筒 · 再次摇签';
+      hint.style.animation = 'pulse 2s ease-in-out infinite';
+    }, 1000);
+  }, 1800);
+}
+
+function showResult(lot) {
+  const el = document.getElementById('result');
+  const typeClass = getTypeClass(lot.type);
+
+  el.innerHTML = `
+    <div class="result-card">
+      <div class="result-num">第 ${lot.num} 签</div>
+      <div class="result-type ${typeClass}">${lot.type}签</div>
+      <div class="result-story">典故：${lot.title} · ${lot.story}</div>
+      <div class="divider"></div>
+      <div class="poem">
+        ${lot.poem.map(l => l + '<br>').join('')}
+      </div>
+      <div class="divider"></div>
+      <div class="interpretation">
+        <h3>解 曰</h3>
+        <p>${lot.jie}</p>
+      </div>
+      <div class="interpretation" style="margin-top:10px;">
+        <h3>签 意</h3>
+        <div class="detail-grid">
+          <div class="detail-item">求财：<span>${getAdvice(lot.type, '财')}</span></div>
+          <div class="detail-item">婚姻：<span>${getAdvice(lot.type, '婚')}</span></div>
+          <div class="detail-item">事业：<span>${getAdvice(lot.type, '业')}</span></div>
+          <div class="detail-item">健康：<span>${getAdvice(lot.type, '健')}</span></div>
+        </div>
+      </div>
+    </div>
+    <button class="btn-again" onclick="drawLot()">再 求 一 签</button>
+  `;
+
+  // 动画显示
+  requestAnimationFrame(() => {
+    el.classList.add('show');
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+}
+
+function getTypeClass(type) {
+  if (type.includes('上上')) return 'type-上上';
+  if (type.includes('上吉')) return 'type-上吉';
+  if (type.includes('上平')) return 'type-上吉';
+  if (type.includes('中吉')) return 'type-中吉';
+  if (type.includes('中平')) return 'type-中平';
+  if (type.includes('中下')) return 'type-中下';
+  if (type.includes('下下')) return 'type-下下';
+  return 'type-中平';
+}
+
+function getAdvice(type, category) {
+  const advices = {
+    '上上': { '财': '大吉，财源广进', '婚': '天作之合，大吉', '业': '如日中天，大利', '健': '身体康健，无忧' },
+    '上吉': { '财': '吉，财运亨通', '婚': '良缘天定，吉', '业': '步步高升，吉', '健': '平安健康' },
+    '上平': { '财': '吉，稳中有进', '婚': '姻缘可成', '业': '渐入佳境', '健': '无大碍，宜养生' },
+    '中吉': { '财': '小吉，勤劳可得', '婚': '有望，需耐心', '业': '稳步前进', '健': '小心调养' },
+    '中平': { '财': '平，量入为出', '婚': '随缘，莫强求', '业': '守成为上', '健': '注意休息' },
+    '中下': { '财': '不宜冒进', '婚': '暂缓为宜', '业': '宜守不宜攻', '健': '宜多调养' },
+    '下下': { '财': '谨慎理财', '婚': '暂不宜', '业': '韬光养晦', '健': '多加注意' }
+  };
+  return (advices[type] && advices[type][category]) || '顺其自然';
+}
+</script>
+</body>
+</html>
