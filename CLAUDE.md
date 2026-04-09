@@ -6,10 +6,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Chinese fortune-telling (抽签/灵签) web app featuring seven oracle pages:
 
-- **index.html** — 观音灵签 (Guanyin Oracle): Temple red/gold theme, bamboo stick tube animation, 100 fortune lots
+- **index.html** — 文王六十四卦 (King Wen I Ching): Bronze/verdigris theme, coin-toss hexagram animation, 64 hexagrams (default landing page)
+- **guanyin.html** — 观音灵签 (Guanyin Oracle): Temple red/gold theme, bamboo stick tube animation, 100 fortune lots
 - **guandi.html** — 关帝灵签 (Guan Di Oracle): Dark bronze/gold theme, SVG 青龙偃月刀 (Green Dragon Crescent Blade) icon with shake animation, 100 fortune lots
 - **lvzu.html** — 吕祖灵签 (Lv Zu Oracle): Purple/warm-gold Daoist theme, spinning ☯ bagua animation, 100 fortune lots
-- **wenwang.html** — 文王六十四卦 (King Wen I Ching): Bronze/verdigris theme, coin-toss hexagram animation, 64 hexagrams
 - **yuelao.html** — 月老灵签 (Yue Lao Oracle): Romantic red/pink theme, red thread animation, 60 fortune lots
 - **caishen.html** — 财神灵签 (Caishen Oracle): Gold/red wealth theme, ingot animation, 62 fortune lots
 - **huangdaxian.html** — 黄大仙灵签 (Wong Tai Sin Oracle): Yellow/amber Daoist theme, SVG gourd (葫芦) icon with shake animation, 100 fortune lots
