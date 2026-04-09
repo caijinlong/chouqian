@@ -1028,7 +1028,7 @@ function showResult(gua, lines) {
   // 构建六爻图HTML
   const yaoNames = ['初爻','二爻','三爻','四爻','五爻','上爻'];
   let hexDisplay = '';
-  for (let i = 5; i >= 0; i--) {
+  for (let i = 0; i < 6; i++) {
     const isYang = toBit(lines[i]) === 1;
     if (isYang) {
       hexDisplay += `<div class="hex-yao"><span class="hex-label">${yaoNames[i]}</span><span class="hex-bar yang"></span></div>`;
