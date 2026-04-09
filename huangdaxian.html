@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>黄大仙灵签</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&family=Ma+Shan+Zheng&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    min-height: 100vh;
+    background: #0a0600;
+    color: #f5e6c8;
+    font-family: 'Noto Serif SC', serif;
+    overflow-x: hidden;
+  }
+
+  .bg-layer {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(ellipse at 50% 30%, #1a1200 0%, #0a0600 70%);
+    z-index: 0;
+  }
+
+  /* 仙气粒子 */
+  .particle-container {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 1; overflow: hidden;
+  }
+  .particle {
+    position: absolute;
+    border-radius: 50%;
+    animation: xianFloat linear infinite;
+  }
+  @keyframes xianFloat {
+    0% { transform: translateY(0) translateX(0) scale(1); opacity: 0; }
+    15% { opacity: 0.6; }
+    60% { opacity: 0.3; }
+    100% { transform: translateY(-100vh) translateX(20px) scale(1.8); opacity: 0; }
+  }
+
+  .container {
+    position: relative; z-index: 2;
+    max-width: 600px; margin: 0 auto; padding: 20px;
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+  }
+
+  /* 导航 */
+  .nav-link-l {
+    position: fixed; top: 16px; left: 16px;
+    color: #8a7a3a; font-size: 0.85rem;
+    text-decoration: none; letter-spacing: 2px;
+    z-index: 10; transition: color 0.3s;
+  }
+  .nav-link-l:hover { color: #ffcc00; }
+  .nav-link-r {
+    position: fixed; top: 16px; right: 16px;
+    color: #8a7a3a; font-size: 0.85rem;
+    text-decoration: none; letter-spacing: 2px;
+    z-index: 10; transition: color 0.3s;
+  }
+  .nav-link-r:hover { color: #ffcc00; }
+
+  /* 标题 */
+  .header { text-align: center; margin-top: 30px; margin-bottom: 10px; }
+  .header h1 {
+    font-family: 'Ma Shan Zheng', cursive;
+    font-size: 3rem;
+    color: #ffcc00;
+    text-shadow: 0 0 20px rgba(255,204,0,0.4), 0 0 50px rgba(255,180,0,0.15), 0 2px 4px rgba(0,0,0,0.6);
+    letter-spacing: 12px;
+  }
+  .header p {
+    font-size: 0.95rem; color: #c4a44a; margin-top: 8px;
+    letter-spacing: 4px;
+  }
+  .header .sub {
+    font-size: 0.8rem; color: #8a7a3a; margin-top: 4px;
+    letter-spacing: 2px;
+  }
+
+  /* 葫芦区域 */
+  .gourd-area {
+    display: flex; flex-direction: column; align-items: center;
+    margin-top: 24px; width: 100%;
+  }
+
+  .gourd-wrapper {
+    position: relative; cursor: pointer;
+    width: 220px; height: 260px;
+    margin-bottom: 20px;
+    transition: transform 0.2s;
+  }
+  .gourd-wrapper:hover { transform: scale(1.05); }
+  .gourd-wrapper:active { transform: scale(0.95); }
+
+  .gourd-circle {
+    width: 220px; height: 220px;
+    border-radius: 50%;
+    border: 3px solid rgba(255,204,0,0.35);
+    background: radial-gradient(circle, #1a1200 20%, #0e0a00 100%);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 40px rgba(255,200,0,0.12), inset 0 0 30px rgba(255,200,0,0.06);
+    position: relative;
+    overflow: hidden;
+  }
+  .gourd-icon {
+    height: 160px;
+    width: auto;
+    user-select: none;
+    position: relative;
+    z-index: 2;
+    filter: drop-shadow(0 0 12px rgba(255,204,0,0.4)) drop-shadow(0 0 25px rgba(255,180,0,0.2));
+  }
+  .gourd-circle::after {
+    content: '';
+    position: absolute;
+    width: 220px; height: 220px;
+    border: 1px solid rgba(255,204,0,0.08);
+    border-radius: 50%;
+    animation: rotateSlow 40s linear infinite;
+  }
+  @keyframes rotateSlow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  .gourd-text {
+    position: absolute; bottom: 0; width: 100%;
+    text-align: center;
+    font-family: 'Ma Shan Zheng', cursive;
+    font-size: 1rem;
+    color: rgba(255,204,0,0.35);
+    letter-spacing: 8px;
+  }
+
+  /* 摇签动画 */
+  .shaking .gourd-circle {
+    animation: shakeCircle 0.08s ease-in-out infinite alternate;
+    box-shadow: 0 0 60px rgba(255,200,0,0.3), inset 0 0 40px rgba(255,200,0,0.15);
+  }
+  @keyframes shakeCircle {
+    0% { transform: rotate(-2deg) scale(1.02); }
+    100% { transform: rotate(2deg) scale(1.02); }
+  }
+  .shaking .gourd-icon {
+    animation: shakeIcon 0.12s ease-in-out infinite alternate;
+    filter: drop-shadow(0 0 20px rgba(255,204,0,0.7)) drop-shadow(0 0 40px rgba(255,180,0,0.4));
+  }
+  @keyframes shakeIcon {
+    0% { transform: rotate(-8deg); }
+    100% { transform: rotate(8deg); }
+  }
+
+  /* 闪光 */
+  .flash {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(circle, rgba(255,220,50,0.35), transparent 70%);
+    z-index: 5; pointer-events: none;
+    opacity: 0; animation: flashOnce 0.6s ease-out forwards;
+  }
+  @keyframes flashOnce {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  .hint {
+    font-size: 0.9rem; color: #8a7a3a; margin-bottom: 20px;
+    letter-spacing: 2px;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+  }
+
+  .btn {
+    background: linear-gradient(135deg, #6a4a00, #c49a00, #6a4a00);
+    color: #fff5e0; border: 1px solid rgba(255,204,0,0.4);
+    padding: 14px 48px;
+    font-family: 'Noto Serif SC', serif;
+    font-size: 1.15rem; font-weight: 700;
+    border-radius: 50px; cursor: pointer;
+    letter-spacing: 6px;
+    box-shadow: 0 4px 20px rgba(255,200,0,0.2);
+    transition: all 0.3s;
+    margin-top: 10px;
+  }
+  .btn:hover {
+    box-shadow: 0 6px 30px rgba(255,200,0,0.4);
+    transform: translateY(-2px);
+  }
+  .btn:active { transform: translateY(0); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  /* 结果区 */
+  .result {
+    width: 100%; max-width: 520px;
+    margin-top: 30px;
+    opacity: 0; transform: translateY(30px);
+    transition: all 0.8s ease;
+    display: none;
+  }
+  .result.show { display: block; opacity: 1; transform: translateY(0); }
+
+  .result-card {
+    background: linear-gradient(135deg, #1a1200, #241a00, #1a1200);
+    border: 2px solid rgba(255,204,0,0.3);
+    border-radius: 16px;
+    padding: 30px 24px;
+    position: relative; overflow: hidden;
+  }
+  .result-card::before {
+    content: '';
+    position: absolute; top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(circle at 50% 50%, rgba(255,220,50,0.03), transparent 60%);
+  }
+
+  .result-num {
+    text-align: center;
+    font-family: 'Ma Shan Zheng', cursive;
+    font-size: 1.3rem;
+    color: #c4a44a;
+    margin-bottom: 6px;
+  }
+
+  .result-type {
+    text-align: center;
+    font-size: 1.6rem; font-weight: 900;
+    margin-bottom: 8px;
+    letter-spacing: 4px;
+  }
+  .type-上上 { color: #ffcc00; text-shadow: 0 0 14px rgba(255,204,0,0.5); }
+  .type-上吉 { color: #ffc040; text-shadow: 0 0 10px rgba(255,192,64,0.4); }
+  .type-中吉 { color: #daa520; text-shadow: 0 0 8px rgba(218,165,32,0.3); }
+  .type-中平 { color: #b8960b; }
+  .type-中下 { color: #8a7a3a; }
+  .type-下下 { color: #5a4a2a; }
+
+  .result-story {
+    text-align: center; font-size: 0.9rem;
+    color: #8a7a3a; margin-bottom: 16px;
+    letter-spacing: 2px;
+  }
+
+  .divider {
+    width: 60%; height: 1px; margin: 0 auto 16px;
+    background: linear-gradient(90deg, transparent, rgba(255,204,0,0.3), transparent);
+  }
+
+  .poem {
+    text-align: center; line-height: 2.4;
+    font-size: 1.2rem; color: #f5e6c8;
+    font-family: 'Ma Shan Zheng', cursive;
+    letter-spacing: 3px; margin-bottom: 16px;
+  }
+
+  .interpretation {
+    background: rgba(0,0,0,0.35);
+    border-radius: 10px;
+    padding: 16px 18px; margin-top: 12px;
+  }
+  .interpretation h3 {
+    color: #daa520; font-size: 1rem;
+    margin-bottom: 8px; letter-spacing: 4px;
+  }
+  .interpretation p {
+    font-size: 0.92rem; line-height: 1.9; color: #c4a44a;
+  }
+
+  .detail-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 8px 16px; margin-top: 12px;
+  }
+  .detail-item { font-size: 0.85rem; color: #8a7a3a; }
+  .detail-item span { color: #c4a44a; }
+
+  .btn-again {
+    display: block; margin: 24px auto 40px;
+    background: transparent;
+    border: 1.5px solid rgba(255,204,0,0.3);
+    color: #daa520;
+    padding: 10px 36px;
+    font-family: 'Noto Serif SC', serif;
+    font-size: 0.95rem;
+    border-radius: 50px; cursor: pointer;
+    letter-spacing: 4px; transition: all 0.3s;
+  }
+  .btn-again:hover { background: rgba(255,204,0,0.06); }
+
+  @media (max-width: 480px) {
+    .header h1 { font-size: 2.4rem; letter-spacing: 8px; }
+    .poem { font-size: 1.1rem; }
+    .result-card { padding: 24px 16px; }
+    .gourd-wrapper { width: 170px; height: 210px; }
+    .gourd-circle { width: 170px; height: 170px; }
+    .gourd-icon { height: 120px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-layer"></div>
+<div class="particle-container" id="particleContainer"></div>
+
+<a href="index.html" class="nav-link-l">← 观音灵签</a>
+<a href="guandi.html" class="nav-link-r">关帝灵签 →</a>
+<a href="lvzu.html" class="nav-link-r" style="top:38px">吕祖灵签 →</a>
+<a href="wenwang.html" class="nav-link-r" style="top:60px">文王六十四卦 →</a>
+<a href="yuelao.html" class="nav-link-r" style="top:82px">月老灵签 →</a>
+<a href="caishen.html" class="nav-link-r" style="top:104px">财神灵签 →</a>
+
+<div class="container">
+  <div class="header">
+    <h1>黄大仙灵签</h1>
+    <p>赤松黄大仙 · 有求必应</p>
+    <div class="sub">普济劝善 · 灵验无比</div>
+  </div>
+
+  <div class="gourd-area" id="gourdArea">
+    <div class="gourd-wrapper" id="gourdWrapper" onclick="drawLot()">
+      <div class="gourd-circle">
+        <svg class="gourd-icon" viewBox="0 0 100 180" xmlns="http://www.w3.org/2000/svg">
+          <!-- 葫芦 -->
+          <defs>
+            <radialGradient id="gourdGradTop" cx="50%" cy="40%" r="50%">
+              <stop offset="0%" stop-color="#e6a800"/>
+              <stop offset="60%" stop-color="#b8860b"/>
+              <stop offset="100%" stop-color="#8a6a00"/>
+            </radialGradient>
+            <radialGradient id="gourdGradBot" cx="50%" cy="45%" r="55%">
+              <stop offset="0%" stop-color="#daa520"/>
+              <stop offset="50%" stop-color="#a07800"/>
+              <stop offset="100%" stop-color="#705200"/>
+            </radialGradient>
+            <linearGradient id="stemGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#5a4a20"/>
+              <stop offset="100%" stop-color="#8a7a30"/>
+            </linearGradient>
+          </defs>
+          <!-- 茎 -->
+          <path d="M 50 12 C 50 8, 48 4, 46 2 C 44 0, 42 2, 44 6 C 45 8, 48 10, 50 12" fill="#6a5a20" opacity="0.8"/>
+          <rect x="48" y="10" width="4" height="14" rx="2" fill="url(#stemGrad)"/>
+          <!-- 系带 -->
+          <path d="M 44 22 Q 38 28, 34 24" stroke="#cc3333" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.8"/>
+          <path d="M 56 22 Q 62 28, 66 24" stroke="#cc3333" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.8"/>
+          <circle cx="34" cy="24" r="2.5" fill="#cc3333" opacity="0.7"/>
+          <circle cx="66" cy="24" r="2.5" fill="#cc3333" opacity="0.7"/>
+          <!-- 上葫芦（小） -->
+          <ellipse cx="50" cy="46" rx="22" ry="24" fill="url(#gourdGradTop)" stroke="#a08020" stroke-width="1"/>
+          <!-- 高光 -->
+          <ellipse cx="44" cy="40" rx="8" ry="10" fill="rgba(255,255,200,0.15)"/>
+          <!-- 腰部 -->
+          <ellipse cx="50" cy="72" rx="15" ry="6" fill="#8a6a00" opacity="0.6"/>
+          <!-- 下葫芦（大） -->
+          <ellipse cx="50" cy="112" rx="34" ry="42" fill="url(#gourdGradBot)" stroke="#8a6a00" stroke-width="1"/>
+          <!-- 下高光 -->
+          <ellipse cx="40" cy="102" rx="12" ry="16" fill="rgba(255,255,200,0.1)"/>
+          <!-- 仙气纹 -->
+          <path d="M 36 95 Q 50 88, 64 95" stroke="rgba(255,204,0,0.2)" stroke-width="0.8" fill="none"/>
+          <path d="M 32 110 Q 50 102, 68 110" stroke="rgba(255,204,0,0.15)" stroke-width="0.8" fill="none"/>
+          <path d="M 34 125 Q 50 118, 66 125" stroke="rgba(255,204,0,0.12)" stroke-width="0.8" fill="none"/>
+          <!-- 福字 -->
+          <text x="50" y="118" text-anchor="middle" font-family="Ma Shan Zheng, cursive" font-size="22" fill="rgba(255,204,0,0.3)">福</text>
+        </svg>
+      </div>
+      <div class="gourd-text">宝葫仙签</div>
+    </div>
+    <p class="hint" id="hint">点击求签 · 诚心祷告</p>
+    <button class="btn" onclick="drawLot()" id="drawBtn">求 签</button>
+  </div>
+
+  <div class="result" id="result"></div>
+</div>
+
+<script>
+// 仙气粒子
+const pCtn = document.getElementById('particleContainer');
+for (let i = 0; i < 20; i++) {
+  const p = document.createElement('div');
+  p.className = 'particle';
+  const colors = [
+    'radial-gradient(circle, rgba(255,204,0,0.5), transparent)',
+    'radial-gradient(circle, rgba(255,220,80,0.4), transparent)',
+    'radial-gradient(circle, rgba(255,180,50,0.45), transparent)'
+  ];
+  p.style.cssText = `
+    left: ${Math.random() * 100}%;
+    bottom: ${Math.random() * 20}%;
+    width: ${2 + Math.random() * 4}px;
+    height: ${2 + Math.random() * 4}px;
+    background: ${colors[i % 3]};
+    animation-duration: ${8 + Math.random() * 10}s;
+    animation-delay: ${Math.random() * 8}s;
+  `;
+  pCtn.appendChild(p);
+}
+
+// ====== 黄大仙灵签 100 签 ======
+const lots = [
+  {num:1,type:"上上",poem:["灵签第一枝为首","万事由天莫强求","若问前程归善道","福禄寿全在心修"],story:"黄大仙得道成仙",jie:"万事开头之象。凡事以善为本。心存善念，福禄自来。诚心修行，百事亨通。"},
+  {num:2,type:"中吉",poem:["春雷一声万物苏","枯枝发芽又成株","此时正是兴旺日","一门瑞气满前途"],story:"枯木逢春",jie:"万物复苏之象。凡事渐入佳境。蛰伏已久，时机将至。"},
+  {num:3,type:"上吉",poem:["赤松仙翁降吉祥","有求必应在身旁","若是心诚来叩问","一签在手百事昌"],story:"赤松子降世",jie:"仙翁庇佑之象。凡事吉祥如意。心诚则灵，有求必应。"},
+  {num:4,type:"中平",poem:["浮云蔽日暂无光","莫道前途尽渺茫","等待风来云自散","一轮红日照八方"],story:"文王访贤",jie:"暂时蒙蔽之象。凡事须耐心等待。云散日出，光明在前。"},
+  {num:5,type:"中下",poem:["独行荒野少人烟","寸步难行路不前","此时切莫轻冒进","守静待时自安然"],story:"困龙得水",jie:"行路艰难之象。凡事不宜冒进。安守本分，静待转机。"},
+  {num:6,type:"大吉",poem:["宝鼎香烟透碧霄","瑶池赴宴乐逍遥","此签得者多福泽","一生富贵步步高"],story:"八仙过海",jie:"福泽深厚之象。凡事大吉大利。富贵荣华，步步高升。"},
+  {num:7,type:"中吉",poem:["仙鹤翩翩下九天","口衔灵芝到人间","若得此签须惜福","修身行善保平安"],story:"仙鹤献芝",jie:"天降福缘之象。凡事惜福行善。知恩图报，福泽绵长。"},
+  {num:8,type:"中平",poem:["月到中秋分外明","人逢喜事精神清","只是此时需谨慎","莫让好事变虚惊"],story:"嫦娥奔月",jie:"喜中有忧之象。凡事虽好但须小心。谨慎行事，方保无虞。"},
+  {num:9,type:"下下",poem:["风急浪高渡船难","满天乌云遮月寒","此时切莫思远行","闭门静守保平安"],story:"夸父逐日",jie:"风浪交加之象。凡事不利。不宜出行，不宜冒险。闭门为安。"},
+  {num:10,type:"上吉",poem:["一轮明月照前程","万里无云天色清","贵人指路迷津渡","从此坦途步步升"],story:"黄石授书",jie:"明月当空之象。凡事清明可见。贵人相助，前途光明。"},
+  {num:11,type:"中吉",poem:["小桥流水绕山村","淡淡炊烟暮色昏","此去虽无大富贵","一家和乐享天伦"],story:"陶渊明归隐",jie:"安居乐业之象。凡事平安和顺。不求大富，但得安宁。"},
+  {num:12,type:"中下",poem:["孤雁失群叫声哀","天寒地冻少人来","此时不宜谋大事","静守寒窗待春回"],story:"苏武牧羊",jie:"孤独失意之象。凡事不宜大动。忍耐寒冬，春日自来。"},
+  {num:13,type:"上上",poem:["金玉满堂福寿全","儿孙绕膝乐天年","此签大吉无须虑","一生荣华享太平"],story:"郭子仪拜寿",jie:"金玉满堂之象。凡事大吉。福禄寿全，一家安康。"},
+  {num:14,type:"中吉",poem:["拨开云雾见青天","一片光明在眼前","多年心愿今朝遂","好似枯木又逢春"],story:"重耳复国",jie:"云开日出之象。凡事柳暗花明。困境已过，心愿得遂。"},
+  {num:15,type:"中平",poem:["竹篮打水一场空","辛辛苦苦付东风","此时不必多伤感","换个方法自然通"],story:"愚公移山",jie:"劳而少功之象。凡事方法不对。换个思路，另辟蹊径。"},
+  {num:16,type:"上吉",poem:["丹炉火起炼金丹","道法自然悟真玄","此去修行多善果","功成圆满上青天"],story:"黄大仙炼丹",jie:"修行得道之象。凡事精进则成。持之以恒，终得正果。"},
+  {num:17,type:"中下",poem:["薄冰之上小心行","一步踏错坠深坑","此时万事宜谨慎","三思而后方可行"],story:"履霜坚冰",jie:"如履薄冰之象。凡事须极其谨慎。一着不慎，满盘皆输。"},
+  {num:18,type:"中吉",poem:["久旱逢甘霖一场","枯苗得水自生光","从今好运渐渐至","一路春风送远航"],story:"大禹治水",jie:"久旱逢甘之象。凡事困难已过。好运将至，一帆风顺。"},
+  {num:19,type:"大吉",poem:["五色祥云绕殿堂","仙乐飘飘透八方","此签求得无不利","一年四季尽呈祥"],story:"瑶池盛会",jie:"祥云瑞气之象。凡事大吉大利。四季平安，万事如意。"},
+  {num:20,type:"中平",poem:["镜花水月终是空","不如脚踏在实中","莫被虚名来迷惑","一步一行见真功"],story:"庄周梦蝶",jie:"虚实难辨之象。凡事务实为要。不追虚名，踏实前行。"},
+  {num:21,type:"上吉",poem:["良药苦口利于病","忠言逆耳利于行","若听仙翁一句话","一生平安享太平"],story:"扁鹊行医",jie:"良药苦口之象。凡事听从善言。虚心纳谏，趋吉避凶。"},
+  {num:22,type:"中吉",poem:["细水长流润万物","不求急雨只求恒","持家立业凭勤俭","日积月累自丰盈"],story:"范蠡经商",jie:"细水长流之象。凡事贵在持之以恒。勤俭持家，日久自丰。"},
+  {num:23,type:"中下",poem:["夜深独坐听风声","窗外寒鸦几度鸣","此时诸事多阻碍","且把愁心付五更"],story:"屈原问天",jie:"夜深愁重之象。凡事多有阻碍。暂且忍耐，待到天明。"},
+  {num:24,type:"上上",poem:["紫气东来满庭芳","福星高照在头上","此签得者皆如意","家宅平安事业昌"],story:"老子出关",jie:"紫气东来之象。凡事大吉。福星高照，家宅平安，事业兴旺。"},
+  {num:25,type:"中平",poem:["半窗明月照书台","夜半钟声入梦来","世间万事如棋局","落子无悔莫徘徊"],story:"烂柯山",jie:"棋局人生之象。凡事须果断决策。犹豫不决，反失良机。"},
+  {num:26,type:"中吉",poem:["桃李满园春色浓","一枝独秀出群丛","只须勤劳加智慧","功名利禄自然丰"],story:"桃李满天下",jie:"桃李争春之象。凡事出类拔萃。勤劳加智慧，前途无量。"},
+  {num:27,type:"下下",poem:["乌云密布雨将倾","雷声隆隆震人惊","此时切莫行险路","安居静守保安宁"],story:"共工怒触不周山",jie:"风雨欲来之象。凡事大不利。安居不动，方保安全。"},
+  {num:28,type:"中吉",poem:["溪边垂钓等鱼来","不急不躁自安排","只要功夫深似海","铁杵也能磨成针"],story:"太公垂钓",jie:"耐心等待之象。凡事水到渠成。不急不躁，功到自成。"},
+  {num:29,type:"上吉",poem:["凤凰来仪百鸟朝","一声清啸响云霄","此签得者鸿运至","万事如意步步高"],story:"凤鸣岐山",jie:"凤凰来仪之象。凡事大吉。鸿运当头，万事亨通。"},
+  {num:30,type:"中平",poem:["一叶轻舟过万山","前途风浪总相关","只须把稳船头向","自有平安到彼岸"],story:"达摩一苇渡江",jie:"乘舟渡险之象。凡事须把握方向。风浪虽大，终到彼岸。"},
+  {num:31,type:"中吉",poem:["春蚕吐丝织锦衣","一针一线显功夫","此去虽然多辛苦","终成华裳乐无虞"],story:"织女织锦",jie:"辛勤织锦之象。凡事一分耕耘一分收获。辛苦终有回报。"},
+  {num:32,type:"中下",poem:["落花有意水无情","空自叹息到天明","此时切莫强追求","随缘自在最安宁"],story:"牛郎织女",jie:"有意无缘之象。凡事不可强求。随缘而行，心自安宁。"},
+  {num:33,type:"大吉",poem:["仙翁赐药病即痊","妙手回春万人传","此签大吉无灾祸","一门清泰福寿全"],story:"黄大仙赐药",jie:"仙翁赐福之象。凡事大吉。灾消病愈，福寿绵长。有求必应。"},
+  {num:34,type:"中吉",poem:["山穷水尽疑无路","柳暗花明又一村","莫道眼前多困顿","转弯之处是乾坤"],story:"武陵渔人",jie:"柳暗花明之象。凡事绝处逢生。看似无路，实有转机。"},
+  {num:35,type:"中平",poem:["一壶浊酒喜相逢","古今多少事笑谈中","世间名利如浮云","不如闲坐听松风"],story:"竹林七贤",jie:"淡泊名利之象。凡事看开为好。名利如云，何必执着。"},
+  {num:36,type:"上吉",poem:["瑞雪兆丰年景好","银装素裹换新装","来年五谷皆丰登","仓满廪实福满堂"],story:"后稷教稼",jie:"瑞雪丰年之象。凡事丰收有望。厚积薄发，福泽深厚。"},
+  {num:37,type:"中下",poem:["秋风萧瑟叶纷飞","一年光景暗中催","此时万事宜收敛","莫种新苗待来回"],story:"宋玉悲秋",jie:"秋意萧条之象。凡事宜收不宜放。韬光养晦，来年再为。"},
+  {num:38,type:"中吉",poem:["古井无波心如水","闲看庭前花开落","若能放下执念去","一片清明在胸壑"],story:"六祖慧能",jie:"心如止水之象。凡事放下执念。心境清明，自见真谛。"},
+  {num:39,type:"上上",poem:["天赐良缘不可辞","一朝相遇即相知","此签求婚最为美","百年好合永不移"],story:"月下老人",jie:"天赐良缘之象。凡事大吉，尤利婚姻。百年好合，琴瑟和鸣。"},
+  {num:40,type:"中平",poem:["种瓜得瓜种豆豆","因果循环自有由","莫怨天来莫尤人","反躬自省乐无忧"],story:"因果报应",jie:"因果循环之象。凡事种什么因得什么果。自省修身，不怨天尤人。"},
+  {num:41,type:"中吉",poem:["一声鸡鸣天将明","东方渐白启晨星","黑夜已过曙光现","万物欣欣向日生"],story:"闻鸡起舞",jie:"破晓将明之象。凡事黑暗即将过去。曙光在前，振作精神。"},
+  {num:42,type:"上吉",poem:["一帆风顺到蓬莱","宝岛仙山任往来","此签得者多吉庆","一年四季喜常开"],story:"蓬莱仙境",jie:"一帆风顺之象。凡事顺遂无阻。吉庆有余，喜事连连。"},
+  {num:43,type:"中下",poem:["画饼充饥终是空","镜中之花水中龙","此时莫要心太高","脚踏实地建奇功"],story:"画饼充饥",jie:"好高骛远之象。凡事不切实际。脚踏实地，方有所成。"},
+  {num:44,type:"中吉",poem:["松柏经冬不凋零","风霜雨雪更坚贞","此去虽然多磨炼","到头终是不凡人"],story:"岁寒三友",jie:"松柏常青之象。凡事经得起考验。愈磨愈坚，终成大器。"},
+  {num:45,type:"中平",poem:["一场大梦几时休","往事如烟不可留","此时放下心中事","清风明月任自由"],story:"黄粱一梦",jie:"大梦初醒之象。凡事看开放下。往事不可追，活在当下。"},
+  {num:46,type:"大吉",poem:["龙飞凤舞喜盈门","万紫千红总是春","此签最是吉祥日","一门富贵乐天真"],story:"龙凤呈祥",jie:"龙凤呈祥之象。凡事大吉大利。喜气盈门，富贵吉祥。"},
+  {num:47,type:"中吉",poem:["风过竹林声飒飒","雨润兰花香阵阵","此去前途虽曲折","终有晴天在后头"],story:"兰亭雅集",jie:"风雨过后之象。凡事先难后易。曲折之后，终见晴天。"},
+  {num:48,type:"中下",poem:["寒蝉凄切对长亭","暮色苍茫路不明","此时不宜寻远处","安身守己待天晴"],story:"苏轼贬谪",jie:"暮色苍茫之象。凡事前路不明。安守本分，不宜远行。"},
+  {num:49,type:"上吉",poem:["仙人指路不迷津","一点灵光照古今","心存善念行善事","自有天公佑善人"],story:"黄大仙指路",jie:"仙人指路之象。凡事吉祥。心善则吉，行善得福。大仙庇佑。"},
+  {num:50,type:"中平",poem:["水到渠成自然通","何须急急似飘蓬","此时只管勤耕种","秋来定有好收成"],story:"精卫填海",jie:"水到渠成之象。凡事不必急躁。勤恳耕耘，自有收获。"},
+  {num:51,type:"中吉",poem:["一树梅花雪中开","暗香浮动月徘徊","不与百花争春色","独占寒冬第一魁"],story:"梅花三弄",jie:"寒梅傲雪之象。凡事独树一帜。不争不抢，自有高格。"},
+  {num:52,type:"上上",poem:["三星高照福临门","喜气洋洋满乾坤","此签得者千般好","一生顺遂享天恩"],story:"三星拱照",jie:"三星高照之象。凡事大吉。福禄寿三全，一生顺遂无忧。"},
+  {num:53,type:"中下",poem:["独木难支大厦倾","一人之力难回天","此时须得众人助","合力同心可补天"],story:"女娲补天",jie:"独力难支之象。凡事须借助外力。团结合作，方可成事。"},
+  {num:54,type:"中吉",poem:["千里之行始足下","积少成多聚沙塔","莫嫌眼前收获小","日久天长见伟大"],story:"李冰治水",jie:"积少成多之象。凡事贵在积累。一步一步，终成大业。"},
+  {num:55,type:"中平",poem:["明月几时有清光","悲欢离合自寻常","人生何处不相逢","莫把离别挂心上"],story:"苏轼望月",jie:"悲欢离合之象。凡事人之常情。看开离别，珍惜当下。"},
+  {num:56,type:"上吉",poem:["黄金万两不须求","自有天缘到枕头","此签求财最为利","一本万利乐悠悠"],story:"聚宝盆",jie:"财运亨通之象。凡事利于求财。天缘巧合，财源广进。"},
+  {num:57,type:"中吉",poem:["百鸟朝凤林中鸣","一声啼叫万山应","此去虽然路遥远","到处皆有好风景"],story:"百鸟朝凤",jie:"百鸟朝凤之象。凡事众望所归。虽路远，处处有好景。"},
+  {num:58,type:"下下",poem:["暴雨倾盆路难行","泥泞深处困孤城","此时切莫轻举动","等到雨停再启程"],story:"洪水滔天",jie:"暴雨倾盆之象。凡事大不利。静守不动，等待雨停。切勿冒险。"},
+  {num:59,type:"中吉",poem:["老树根深叶自茂","经年累月志不移","此去前途虽缓慢","根基稳固自然奇"],story:"铁杵磨针",jie:"根深叶茂之象。凡事打好根基。稳扎稳打，终有所成。"},
+  {num:60,type:"中平",poem:["一盏青灯伴古佛","万缘放下心自明","世间烦恼皆因执","放下执着见太平"],story:"达摩面壁",jie:"放下执着之象。凡事不必过于执着。放下万缘，心自清明。"},
+  {num:61,type:"上上",poem:["天降甘露润苍生","大仙慈悲济世情","此签求得万事吉","一门清泰保安宁"],story:"黄大仙济世",jie:"天降甘露之象。凡事大吉大利。大仙慈悲护佑，万事安宁。"},
+  {num:62,type:"中吉",poem:["鲤鱼跳过龙门去","一跃翻身万丈高","多年辛苦今朝报","从此青云任逍遥"],story:"鲤鱼跃龙门",jie:"鱼跃龙门之象。凡事出人头地。多年努力终有回报。"},
+  {num:63,type:"中下",poem:["守株待兔空盼望","坐吃山空自遭殃","此时须得勤劳作","方保温饱不心慌"],story:"守株待兔",jie:"坐等空望之象。凡事不可心存侥幸。勤劳为本，方保温饱。"},
+  {num:64,type:"中吉",poem:["天生我材必有用","千金散尽还复来","莫道此时多失意","守得云开见日开"],story:"李白行吟",jie:"天生我材之象。凡事才华终有施展之日。暂时失意，终会得志。"},
+  {num:65,type:"上吉",poem:["满园花开蝶自来","一树硕果任人采","此签得者多收获","不须忧虑自安排"],story:"丰收满仓",jie:"硕果累累之象。凡事收获丰厚。水到渠成，不须忧虑。"},
+  {num:66,type:"中平",poem:["潮涨潮落自有时","花开花谢各有期","莫因一时之得失","乱了阵脚失方寸"],story:"潮起潮落",jie:"潮涨潮落之象。凡事有起有落。不因一时得失而乱。顺势而为。"},
+  {num:67,type:"中吉",poem:["塞翁失马焉知福","失之东隅收桑榆","眼前虽然有小失","日后方知是大福"],story:"塞翁失马",jie:"因祸得福之象。凡事祸福相依。眼前小失，日后大福。"},
+  {num:68,type:"中下",poem:["杯弓蛇影自惊疑","疑心生暗鬼随之","此时切莫多猜忌","坦荡胸怀是良知"],story:"杯弓蛇影",jie:"疑心生暗之象。凡事不可多疑。胸怀坦荡，疑虑自消。"},
+  {num:69,type:"上吉",poem:["一朵莲花出水来","清香飘远众人爱","此签得者品行贵","出淤泥而不染裁"],story:"莲花出水",jie:"莲花出水之象。凡事清白高洁。品行端正，自有好报。"},
+  {num:70,type:"中吉",poem:["乘风破浪正当时","长风万里送归帆","此去前途多顺利","一路平安到家园"],story:"郑和下西洋",jie:"乘风破浪之象。凡事顺风顺水。长风万里，一路平安。"},
+  {num:71,type:"中平",poem:["一着不慎满盘输","此时须得细思量","走一步来看一步","步步为营方无伤"],story:"围棋对弈",jie:"步步为营之象。凡事须谨慎思量。走一步看一步，不可急躁。"},
+  {num:72,type:"大吉",poem:["天官赐福降人间","五福临门喜满天","此签百签皆不及","一生荣华享万年"],story:"天官赐福",jie:"天官赐福之象。凡事大吉大利。五福临门，荣华永享。此为极吉之签。"},
+  {num:73,type:"中下",poem:["刻舟求剑事可笑","世事变迁不可料","此时切莫守旧方","随机应变才是妙"],story:"刻舟求剑",jie:"守旧不变之象。凡事须随机应变。世事变迁，不可固执。"},
+  {num:74,type:"中吉",poem:["千锤万凿出深山","烈火焚烧若等闲","粉身碎骨浑不怕","要留清白在人间"],story:"石灰吟",jie:"千锤百炼之象。凡事经得起考验。不怕磨难，清白做人。"},
+  {num:75,type:"上上",poem:["大仙显灵赐平安","一家老小尽欢颜","此签得者无灾厄","百岁千秋福满天"],story:"黄大仙显灵",jie:"大仙显灵之象。凡事大吉。全家平安，百岁无忧。灵签显验。"},
+  {num:76,type:"中平",poem:["日出东方月落西","一荣一枯自有期","莫为眼前多烦恼","到头万事总相宜"],story:"日月轮转",jie:"日月更替之象。凡事荣枯有时。不必为眼前烦恼，终归相宜。"},
+  {num:77,type:"中吉",poem:["梧桐叶落秋风起","一叶知秋见先机","此时若能早筹谋","来年春暖花满地"],story:"一叶知秋",jie:"先见之明之象。凡事早做准备。见微知著，未雨绸缪。"},
+  {num:78,type:"中下",poem:["拔苗助长反伤根","急于求成事难成","此时万事宜缓进","欲速不达古有云"],story:"拔苗助长",jie:"欲速不达之象。凡事不可急功近利。缓步前行，方得长远。"},
+  {num:79,type:"上吉",poem:["春风得意马蹄疾","一日看尽长安花","此签得者多喜事","功名利禄尽荣华"],story:"状元及第",jie:"春风得意之象。凡事功成名就。喜事临门，荣华富贵。"},
+  {num:80,type:"中吉",poem:["一寸光阴一寸金","寸金难买寸光阴","此时正是用功日","莫待白头空叹吟"],story:"悬梁刺股",jie:"珍惜光阴之象。凡事把握当下。勤奋努力，莫蹉跎岁月。"},
+  {num:81,type:"中平",poem:["塞外秋风吹雁鸣","远方游子盼归程","虽然此时多牵挂","书信一封报平安"],story:"鸿雁传书",jie:"离乡思归之象。凡事远方有牵挂。报平安，保联系，终会团聚。"},
+  {num:82,type:"下下",poem:["井底之蛙观天小","坐井说天笑话多","此时切莫自满足","开阔眼界方超脱"],story:"井底之蛙",jie:"见识短浅之象。凡事须开阔眼界。自满则退，虚心则进。"},
+  {num:83,type:"中吉",poem:["三人行必有师焉","虚心求教益无边","此去贵人时时遇","一路逢源喜连连"],story:"孔子问道",jie:"虚心求教之象。凡事多请教他人。贵人相助，逢源得意。"},
+  {num:84,type:"上吉",poem:["一声春雷惊蛰来","万物苏醒百花开","沉睡已久今朝醒","大展宏图任安排"],story:"惊蛰万物醒",jie:"春雷惊蛰之象。凡事时机已到。蛰伏已久，一鸣惊人。大展宏图。"},
+  {num:85,type:"中下",poem:["盲人摸象各说辞","片面之见难知全","此时切莫下定论","多方了解再向前"],story:"盲人摸象",jie:"以偏概全之象。凡事不可只看一面。多方了解，方可决策。"},
+  {num:86,type:"中吉",poem:["青山不改绿水流","江山代有才人出","此去虽然多变化","随遇而安最风流"],story:"滚滚长江",jie:"江山依旧之象。凡事随遇而安。世事多变，从容应对。"},
+  {num:87,type:"大吉",poem:["一道金光透九重","大仙降福到家中","此签得者无不利","百事亨通万事通"],story:"金光普照",jie:"金光普照之象。凡事大吉大利。百事亨通，无不如意。大仙亲护。"},
+  {num:88,type:"中平",poem:["一山还比一山高","好了还有更好招","莫在山脚就止步","攀登之路自逍遥"],story:"愚公移山",jie:"不断攀登之象。凡事不可满足于现状。持续进取，方见高峰。"},
+  {num:89,type:"中吉",poem:["明珠暗投实可惜","千里马须遇伯乐","此时耐心寻知己","一朝得遇展奇特"],story:"和氏璧",jie:"明珠待识之象。凡事才华须遇知音。耐心等待，终遇伯乐。"},
+  {num:90,type:"上上",poem:["九九归一道法全","大仙指引上青天","此签灵验无双日","百年修得福寿全"],story:"九九重阳",jie:"九九归一之象。凡事圆满大吉。大仙指引，福寿双全。灵签至验。"},
+  {num:91,type:"中下",poem:["叶公好龙非真爱","口是心非难成才","此时须得真心意","表里如一福自来"],story:"叶公好龙",jie:"表里不一之象。凡事须真心实意。虚情假意，难得真福。"},
+  {num:92,type:"中吉",poem:["破釜沉舟志可嘉","一往无前不回家","此去虽然多艰险","成功之日在天涯"],story:"项羽破釜沉舟",jie:"破釜沉舟之象。凡事下定决心。义无反顾，终获成功。"},
+  {num:93,type:"中平",poem:["过犹不及中庸道","太过太少皆不好","凡事适可而止妙","知足常乐最重要"],story:"中庸之道",jie:"中庸适度之象。凡事过犹不及。适可而止，知足常乐。"},
+  {num:94,type:"上吉",poem:["玉兔银蟾照九州","清辉遍地万民收","此签得者多圆满","家和事顺乐悠悠"],story:"玉兔东升",jie:"月圆圆满之象。凡事吉祥圆满。家和万事兴，喜乐悠悠。"},
+  {num:95,type:"中吉",poem:["一粒种子入泥中","春来发芽向碧空","只须勤浇加护理","他日参天大树成"],story:"十年树木",jie:"种子萌芽之象。凡事从小做起。勤勉培育，终成大器。"},
+  {num:96,type:"中下",poem:["亡羊补牢犹未迟","往事不谏来者追","此时知错即改过","重新来过也堪奇"],story:"亡羊补牢",jie:"亡羊补牢之象。凡事知错能改。虽有损失，及时补救尚可。"},
+  {num:97,type:"上上",poem:["有求必应黄大仙","灵签一百最灵验","此签得者百事顺","福寿康宁万万年"],story:"有求必应",jie:"有求必应之象。此为极吉之签。百事顺遂，福寿康宁。大仙至灵至验。"},
+  {num:98,type:"中平",poem:["古道西风瘦马行","断肠人在天涯中","虽然此时多愁绪","明日晴天必有晴"],story:"天涯游子",jie:"旅途愁绪之象。凡事暂时不顺。坚持前行，终见晴天。"},
+  {num:99,type:"中吉",poem:["九十九步须坚持","功亏一篑实可悲","行百里者半九十","最后一步莫轻辞"],story:"行百里半九十",jie:"坚持到底之象。凡事不可半途而废。最后关头，更须坚持。"},
+  {num:100,type:"上上",poem:["百签圆满归大仙","普济劝善度有缘","心诚一片天可鉴","福禄寿喜永绵延"],story:"大仙圆满",jie:"圆满之签。百签归一，道法自然。心诚者黄大仙永佑。万事亨通，福禄寿喜。"}
+];
+
+let isDrawing = false;
+
+function drawLot() {
+  if (isDrawing) return;
+  isDrawing = true;
+
+  const btn = document.getElementById('drawBtn');
+  const hint = document.getElementById('hint');
+  const area = document.getElementById('gourdArea');
+  const resultEl = document.getElementById('result');
+
+  btn.disabled = true;
+  hint.textContent = '大仙显灵中...';
+  hint.style.animation = 'none';
+  resultEl.classList.remove('show');
+
+  area.classList.add('shaking');
+
+  setTimeout(() => {
+    area.classList.remove('shaking');
+
+    const flash = document.createElement('div');
+    flash.className = 'flash';
+    document.body.appendChild(flash);
+    setTimeout(() => flash.remove(), 600);
+
+    setTimeout(() => {
+      const lot = lots[Math.floor(Math.random() * lots.length)];
+      showResult(lot);
+      isDrawing = false;
+      btn.disabled = false;
+      hint.textContent = '点击求签 · 再次祷告';
+      hint.style.animation = 'pulse 2s ease-in-out infinite';
+    }, 400);
+  }, 2000);
+}
+
+function showResult(lot) {
+  const el = document.getElementById('result');
+  const typeClass = getTypeClass(lot.type);
+
+  el.innerHTML = `
+    <div class="result-card">
+      <div class="result-num">第 ${lot.num} 签</div>
+      <div class="result-type ${typeClass}">${lot.type}签</div>
+      <div class="result-story">典故：${lot.story}</div>
+      <div class="divider"></div>
+      <div class="poem">
+        ${lot.poem.map(l => l + '<br>').join('')}
+      </div>
+      <div class="divider"></div>
+      <div class="interpretation">
+        <h3>仙 意</h3>
+        <p>${lot.jie}</p>
+      </div>
+      <div class="interpretation" style="margin-top:10px;">
+        <h3>签 意</h3>
+        <div class="detail-grid">
+          <div class="detail-item">求财：<span>${getAdvice(lot.type,'财')}</span></div>
+          <div class="detail-item">姻缘：<span>${getAdvice(lot.type,'婚')}</span></div>
+          <div class="detail-item">事业：<span>${getAdvice(lot.type,'业')}</span></div>
+          <div class="detail-item">健康：<span>${getAdvice(lot.type,'健')}</span></div>
+          <div class="detail-item">出行：<span>${getAdvice(lot.type,'行')}</span></div>
+          <div class="detail-item">诉讼：<span>${getAdvice(lot.type,'讼')}</span></div>
+        </div>
+      </div>
+    </div>
+    <button class="btn-again" onclick="drawLot()">再 求 一 签</button>
+  `;
+
+  requestAnimationFrame(() => {
+    el.classList.add('show');
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+}
+
+function getTypeClass(type) {
+  if (type === '上上' || type === '大吉') return 'type-上上';
+  if (type === '上吉') return 'type-上吉';
+  if (type === '中吉') return 'type-中吉';
+  if (type === '中平') return 'type-中平';
+  if (type === '中下') return 'type-中下';
+  if (type === '下下') return 'type-下下';
+  return 'type-中平';
+}
+
+function getAdvice(type, cat) {
+  const a = {
+    '上上': {财:'大利，财源广进',婚:'天赐良缘',业:'功成名就',健:'身强体壮',行:'一路平安',讼:'必胜'},
+    '大吉': {财:'大利，财源广进',婚:'天赐良缘',业:'功成名就',健:'身强体壮',行:'一路平安',讼:'必胜'},
+    '上吉': {财:'吉，进财顺利',婚:'良缘可成',业:'步步高升',健:'安康无恙',行:'出入平安',讼:'有利'},
+    '中吉': {财:'小利，勤劳可得',婚:'有望，需耐心',业:'渐有起色',健:'小心调养',行:'宜近不宜远',讼:'宜和解'},
+    '中平': {财:'平平，量入为出',婚:'随缘',业:'守成为上',健:'注意休息',行:'无大碍',讼:'平手'},
+    '中下': {财:'不宜投资',婚:'暂缓',业:'宜守不宜攻',健:'宜多调养',行:'不宜远行',讼:'不利'},
+    '下下': {财:'谨慎守财',婚:'不宜',业:'韬光养晦',健:'多加注意',行:'不宜出行',讼:'宜避'}
+  };
+  return (a[type] && a[type][cat]) || '顺其自然';
+}
+</script>
+</body>
+</html>
