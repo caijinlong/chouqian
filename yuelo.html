@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>月老灵签</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&family=Ma+Shan+Zheng&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    min-height: 100vh;
+    background: #140810;
+    color: #fff0e6;
+    font-family: 'Noto Serif SC', serif;
+    overflow-x: hidden;
+  }
+
+  .bg-layer {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(ellipse at 50% 20%, #2a1020 0%, #140810 70%);
+    z-index: 0;
+  }
+
+  /* 花瓣粒子 */
+  .petal-container {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 1; overflow: hidden;
+  }
+  .petal {
+    position: absolute;
+    width: 8px; height: 8px;
+    background: radial-gradient(circle, rgba(220,100,130,0.5), transparent);
+    border-radius: 50% 0 50% 0;
+    animation: petalFall linear infinite;
+  }
+  @keyframes petalFall {
+    0% { transform: translateY(-10vh) translateX(0) rotate(0deg) scale(1); opacity: 0; }
+    10% { opacity: 0.7; }
+    80% { opacity: 0.4; }
+    100% { transform: translateY(110vh) translateX(60px) rotate(360deg) scale(0.5); opacity: 0; }
+  }
+
+  .container {
+    position: relative; z-index: 2;
+    max-width: 600px; margin: 0 auto; padding: 20px;
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+  }
+
+  .header {
+    text-align: center; margin-top: 40px; margin-bottom: 30px;
+  }
+  .header h1 {
+    font-family: 'Ma Shan Zheng', cursive;
+    font-size: 3rem; letter-spacing: 12px;
+    color: #f5c6d0;
+    text-shadow: 0 0 30px rgba(200,80,110,0.5), 0 0 60px rgba(200,80,110,0.3);
+  }
+  .header p {
+    margin-top: 8px; font-size: 0.95rem; color: #c9a090;
+    letter-spacing: 4px;
+  }
+  .header .sub {
+    margin-top: 6px; font-size: 0.8rem; color: #a08070;
+    letter-spacing: 6px;
+  }
+
+  /* 红线区域 */
+  .thread-area {
+    display: flex; flex-direction: column; align-items: center;
+    margin-bottom: 30px; position: relative;
+  }
+  .thread-wrapper {
+    width: 200px; height: 200px;
+    cursor: pointer; position: relative;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.3s;
+  }
+  .thread-wrapper:hover { transform: scale(1.05); }
+
+  .thread-knot {
+    width: 200px; height: 200px;
+    position: relative;
+  }
+  .thread-knot svg {
+    width: 100%; height: 100%;
+    filter: drop-shadow(0 0 15px rgba(220,50,80,0.4));
+  }
+
+  /* 红线抖动动画 */
+  .shaking .thread-knot svg {
+    animation: shakeThread 0.1s ease-in-out infinite;
+  }
+  @keyframes shakeThread {
+    0%, 100% { transform: rotate(0deg) scale(1); }
+    25% { transform: rotate(3deg) scale(1.03); }
+    50% { transform: rotate(-3deg) scale(0.97); }
+    75% { transform: rotate(2deg) scale(1.02); }
+  }
+
+  /* 红线发光脉冲 */
+  .shaking .thread-knot svg {
+    filter: drop-shadow(0 0 25px rgba(255,50,80,0.8));
+  }
+
+  .hint {
+    font-size: 0.9rem; color: #c9a090; margin-top: 16px;
+    letter-spacing: 3px;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+  }
+
+  .btn {
+    margin-top: 16px; padding: 12px 50px;
+    font-family: 'Noto Serif SC', serif;
+    font-size: 1.1rem; letter-spacing: 8px;
+    border: none; border-radius: 30px;
+    background: linear-gradient(135deg, #a03050, #c9526a, #a03050);
+    color: #fff0e6; cursor: pointer;
+    box-shadow: 0 0 20px rgba(200,80,110,0.3);
+    transition: all 0.3s;
+  }
+  .btn:hover { box-shadow: 0 0 30px rgba(200,80,110,0.6); transform: scale(1.05); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  /* 闪光 */
+  .flash {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(circle, rgba(255,200,210,0.4), transparent);
+    z-index: 100; pointer-events: none;
+    animation: flashAnim 0.6s ease-out forwards;
+  }
+  @keyframes flashAnim {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  /* 结果 */
+  .result {
+    width: 100%; max-width: 500px;
+    opacity: 0; transform: translateY(40px);
+    transition: all 0.8s ease;
+    pointer-events: none;
+  }
+  .result.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+
+  .result-card {
+    background: linear-gradient(135deg, #1e0c14, #2a1520, #1e0c14);
+    border: 1px solid rgba(200,80,110,0.3);
+    border-radius: 16px;
+    padding: 30px 24px;
+    box-shadow: 0 0 40px rgba(200,80,110,0.15);
+  }
+  .result-num {
+    text-align: center; font-size: 1rem;
+    color: #c9a090; letter-spacing: 4px;
+  }
+  .result-type {
+    text-align: center; font-size: 1.8rem;
+    font-family: 'Ma Shan Zheng', cursive;
+    margin: 8px 0; letter-spacing: 6px;
+  }
+  .type-大吉 { color: #ff6b8a; text-shadow: 0 0 20px rgba(255,107,138,0.6); }
+  .type-上吉 { color: #f5a0b0; text-shadow: 0 0 15px rgba(245,160,176,0.5); }
+  .type-中吉 { color: #d4a0e0; text-shadow: 0 0 12px rgba(212,160,224,0.4); }
+  .type-中平 { color: #c9a090; }
+  .type-中下 { color: #8a6a60; }
+  .type-下下 { color: #6a5048; }
+
+  .divider {
+    height: 1px; margin: 16px 0;
+    background: linear-gradient(90deg, transparent, #c9526a, transparent);
+  }
+
+  .poem {
+    text-align: center;
+    font-family: 'Ma Shan Zheng', cursive;
+    font-size: 1.3rem; line-height: 2.2;
+    color: #f5c6d0; letter-spacing: 2px;
+  }
+
+  .interpretation h3 {
+    text-align: center; font-size: 1rem;
+    color: #c9526a; letter-spacing: 8px;
+    margin-bottom: 10px;
+  }
+  .interpretation p {
+    font-size: 0.92rem; line-height: 1.9;
+    color: #c9a090; text-align: center;
+  }
+
+  .detail-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 8px; margin-top: 8px;
+  }
+  .detail-item {
+    font-size: 0.85rem; color: #a08070;
+    padding: 6px 10px;
+    border-radius: 6px;
+    background: rgba(200,80,110,0.08);
+  }
+  .detail-item span { color: #f5c6d0; }
+
+  .btn-again {
+    display: block; margin: 24px auto 60px;
+    padding: 10px 40px;
+    font-family: 'Noto Serif SC', serif;
+    font-size: 0.95rem; letter-spacing: 6px;
+    border: 1px solid #c9526a;
+    border-radius: 24px;
+    background: transparent;
+    color: #c9526a; cursor: pointer;
+    transition: all 0.3s;
+  }
+  .btn-again:hover {
+    background: rgba(200,80,110,0.15);
+    box-shadow: 0 0 15px rgba(200,80,110,0.3);
+  }
+
+  /* 导航链接 */
+  .nav-link-l {
+    position: fixed; top: 16px; left: 16px;
+    color: #a08070; font-size: 0.85rem;
+    text-decoration: none; letter-spacing: 2px;
+    z-index: 10; transition: color 0.3s;
+  }
+  .nav-link-l:hover { color: #f5c6d0; }
+  .nav-link-r {
+    position: fixed; top: 16px; right: 16px;
+    color: #a08070; font-size: 0.85rem;
+    text-decoration: none; letter-spacing: 2px;
+    z-index: 10; transition: color 0.3s;
+  }
+  .nav-link-r:hover { color: #f5c6d0; }
+
+  @media (max-width: 480px) {
+    .header h1 { font-size: 2.4rem; letter-spacing: 8px; }
+    .poem { font-size: 1.1rem; }
+    .result-card { padding: 24px 16px; }
+    .thread-wrapper { width: 170px; height: 170px; }
+    .thread-knot { width: 170px; height: 170px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-layer"></div>
+<div class="petal-container" id="petalContainer"></div>
+
+<a href="index.html" class="nav-link-l">← 观音灵签</a>
+<a href="guandi.html" class="nav-link-r">关帝灵签 →</a>
+<a href="lvzu.html" class="nav-link-r" style="top:38px">吕祖灵签 →</a>
+<a href="wenwang.html" class="nav-link-r" style="top:60px">文王六十四卦 →</a>
+
+<div class="container">
+  <div class="header">
+    <h1>月老灵签</h1>
+    <p>月下老人 · 千里姻缘</p>
+    <div class="sub">诚心祈愿 · 红线牵缘</div>
+  </div>
+
+  <div class="thread-area" id="threadArea">
+    <div class="thread-wrapper" id="threadWrapper" onclick="drawLot()">
+      <div class="thread-knot">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <!-- 同心结/红绳结 -->
+          <defs>
+            <linearGradient id="threadGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#e03050;stop-opacity:1"/>
+              <stop offset="50%" style="stop-color:#ff6080;stop-opacity:1"/>
+              <stop offset="100%" style="stop-color:#c02040;stop-opacity:1"/>
+            </linearGradient>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="2" result="blur"/>
+              <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+            </filter>
+          </defs>
+          <!-- 外圆环 -->
+          <circle cx="100" cy="100" r="80" fill="none" stroke="url(#threadGrad)" stroke-width="3" opacity="0.3"/>
+          <!-- 红绳心形结 -->
+          <path d="M100 55 C80 35, 40 45, 45 75 C50 100, 80 120, 100 145 C120 120, 150 100, 155 75 C160 45, 120 35, 100 55 Z"
+                fill="none" stroke="url(#threadGrad)" stroke-width="4" stroke-linecap="round" filter="url(#glow)"/>
+          <!-- 内层心 -->
+          <path d="M100 70 C90 58, 70 62, 72 80 C74 95, 90 108, 100 120 C110 108, 126 95, 128 80 C130 62, 110 58, 100 70 Z"
+                fill="none" stroke="url(#threadGrad)" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>
+          <!-- 缠绕红线 -->
+          <path d="M30 100 Q50 80, 72 80 Q85 80, 100 70" fill="none" stroke="url(#threadGrad)" stroke-width="2.5" stroke-linecap="round" opacity="0.6"/>
+          <path d="M170 100 Q150 80, 128 80 Q115 80, 100 70" fill="none" stroke="url(#threadGrad)" stroke-width="2.5" stroke-linecap="round" opacity="0.6"/>
+          <path d="M30 100 Q45 120, 74 95" fill="none" stroke="url(#threadGrad)" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+          <path d="M170 100 Q155 120, 126 95" fill="none" stroke="url(#threadGrad)" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+          <!-- 月老文字 -->
+          <text x="100" y="105" text-anchor="middle" font-family="Ma Shan Zheng, cursive" font-size="22" fill="#f5c6d0" opacity="0.85">缘</text>
+        </svg>
+      </div>
+    </div>
+    <p class="hint" id="hint">点击红线 · 诚心求签</p>
+    <button class="btn" onclick="drawLot()" id="drawBtn">求 签</button>
+  </div>
+
+  <div class="result" id="result"></div>
+</div>
+
+<script>
+// 花瓣粒子
+const pCtn = document.getElementById('petalContainer');
+for (let i = 0; i < 22; i++) {
+  const p = document.createElement('div');
+  p.className = 'petal';
+  const size = 4 + Math.random() * 8;
+  p.style.cssText = `
+    left: ${Math.random() * 100}%;
+    top: ${-10 + Math.random() * 20}%;
+    width: ${size}px;
+    height: ${size}px;
+    animation-duration: ${10 + Math.random() * 12}s;
+    animation-delay: ${Math.random() * 10}s;
+    opacity: ${0.3 + Math.random() * 0.4};
+  `;
+  pCtn.appendChild(p);
+}
+
+// ====== 月老灵签 60 签 ======
+const lots = [
+  {num:1,type:"大吉",poem:["天赐良缘一线牵","月老红绳系两端","鸳鸯戏水情意浓","百年好合在今天"],jie:"此签大吉，天赐良缘。月老已将红线系定，有情人终成眷属。姻缘美满，百年好合。"},
+  {num:2,type:"上吉",poem:["春风化雨润桃花","蝴蝶双飞到君家","一段姻缘天注定","莫负韶华莫负她"],jie:"此签上吉，桃花正旺。有意中人者可大胆表白，缘分天定。珍惜眼前人。"},
+  {num:3,type:"中吉",poem:["隔岸观花花正开","有心摘取莫迟来","犹豫不决缘错过","鼓起勇气向前迈"],jie:"此签中吉，缘分已至。需主动把握，犹豫恐失良机。勇敢迈出第一步。"},
+  {num:4,type:"中平",poem:["水中捞月终是空","镜中之花梦一场","眼前情缘需辨别","莫将虚幻当真情"],jie:"此签中平，需辨真伪。当前感情中或有不实之处，宜冷静审视，莫被表象迷惑。"},
+  {num:5,type:"中下",poem:["秋风吹落并蒂莲","鸿雁南飞各一天","暂时分离莫忧虑","守得云开再团圆"],jie:"此签中下，暂有离别。感情中或遇波折，不必过于忧伤。耐心等待，终有团圆之日。"},
+  {num:6,type:"大吉",poem:["红鸾星动喜临门","金玉良缘在此辰","月老微笑牵红线","佳偶天成贺新婚"],jie:"此签大吉，红鸾星动。婚嫁大吉，此时定亲、订婚、结婚皆为上佳时机。"},
+  {num:7,type:"上吉",poem:["蓝桥相会有前因","今世重逢续旧缘","一见倾心非偶然","前世姻缘今世圆"],jie:"此签上吉，前缘再续。若遇心仪之人，乃前世因缘。莫错过此段美好姻缘。"},
+  {num:8,type:"中平",poem:["落花有意水无情","一厢情愿枉用心","不如且把脚步住","另有佳人在远方"],jie:"此签中平，一厢情愿。当前所求之人未必是真缘。放下执念，缘分自会到来。"},
+  {num:9,type:"中吉",poem:["柳暗花明又一春","桃花朵朵笑迎人","过去烦恼随风去","新的姻缘正降临"],jie:"此签中吉，旧去新来。过去的感情纠葛将了结，新的美好姻缘正在靠近。"},
+  {num:10,type:"下下",poem:["孽缘纠缠理还乱","剪不断来理更烦","不如放手各安好","强求反而两伤残"],jie:"此签下下，孽缘缠身。当前感情已成困局，勉强只会两败俱伤。放手方得解脱。"},
+  {num:11,type:"上吉",poem:["银河架起鹊桥来","牛郎织女渡天台","有情人儿终相聚","千里姻缘一线开"],jie:"此签上吉，鹊桥相会。异地恋人终将团聚，远方有佳音传来。坚持等待必有回报。"},
+  {num:12,type:"中平",poem:["一朵鲜花插牛粪","明珠暗投不自知","劝君睁眼看分明","莫将错爱当真情"],jie:"此签中平，识人不清。身边人未必适合，需擦亮双眼。宁缺毋滥，择良而栖。"},
+  {num:13,type:"中吉",poem:["久旱逢甘霖","他乡遇故知","洞房花烛夜","金榜题名时"],jie:"此签中吉，人生四喜。感情与事业可双丰收。近期或有喜事临门，静候佳音。"},
+  {num:14,type:"中下",poem:["残花败柳不堪折","旧梦重温终是空","过去之事莫回首","向前方有好春风"],jie:"此签中下，旧情难续。想要复合恐怕不易，不如放下过去，向前看方有新缘。"},
+  {num:15,type:"大吉",poem:["并蒂芙蓉水中生","比翼鸟儿林间鸣","此生注定鸳鸯命","携手白头到永恒"],jie:"此签大吉，鸳鸯天定。当前感情极为稳固，可托付终身。此乃白头偕老之兆。"},
+  {num:16,type:"上吉",poem:["月圆之夜露华浓","玉人相对情意融","此时表白正当时","一句倾心定终生"],jie:"此签上吉，表白良机。心中有意中人者，此时表白成功率极高。莫再犹豫。"},
+  {num:17,type:"中平",poem:["雾里看花花非花","朦胧之间辨真假","待到雾散天晴日","方知此情深几何"],jie:"此签中平，感情未明。双方关系尚在朦胧阶段，不必急于定论。时间会给出答案。"},
+  {num:18,type:"中吉",poem:["破镜重圆在今朝","旧情复燃似火烧","前番误会皆消散","重修旧好乐逍遥"],jie:"此签中吉，破镜重圆。已分手者有复合之机，前嫌尽释。但需双方共同努力。"},
+  {num:19,type:"中下",poem:["红颜祸水须提防","花言巧语莫轻信","此时感情多虚假","谨慎行事保安宁"],jie:"此签中下，小心被骗。近期感情中有虚假成分，切勿被甜言蜜语蒙蔽。谨慎择偶。"},
+  {num:20,type:"上吉",poem:["郎才女貌天生对","门当户对最相宜","此番姻缘皆美满","琴瑟和鸣乐无极"],jie:"此签上吉，天作之合。当前对象极为般配，各方面条件相宜。宜早定终身。"},
+  {num:21,type:"中吉",poem:["小别胜新婚","距离生美感","暂时的分离","浓情更深远"],jie:"此签中吉，小别胜新婚。短暂分离反而增进感情。信任对方，感情将更深厚。"},
+  {num:22,type:"大吉",poem:["龙凤呈祥喜盈门","鸾凤和鸣庆良辰","月老亲自来做媒","此生姻缘定乾坤"],jie:"此签大吉，龙凤呈祥。大婚之兆，一切姻缘事宜皆为上吉。此缘千载难逢。"},
+  {num:23,type:"中平",poem:["相思一夜梅花发","独倚寒窗望月华","有缘自会来相会","无缘何必苦牵挂"],jie:"此签中平，随缘为好。思念虽深，缘分未到不可强求。顺其自然，该来的会来。"},
+  {num:24,type:"中吉",poem:["锦上添花花更艳","好事成双喜连连","一段佳话传千里","羡煞旁人在眼前"],jie:"此签中吉，锦上添花。已有感情者将更上一层楼，好事连连，令人羡慕。"},
+  {num:25,type:"上吉",poem:["梧桐树下遇知音","一曲凤求凰动心","此人正是梦中客","相携相伴到如今"],jie:"此签上吉，遇见知音。即将遇到或已遇到灵魂伴侣，彼此心意相通，极为难得。"},
+  {num:26,type:"中下",poem:["同床异梦各怀心","貌合神离空对影","此时不如坦诚谈","解开心结续前行"],jie:"此签中下，貌合神离。感情中缺乏沟通，需坦诚相对。若不及时化解，恐渐行渐远。"},
+  {num:27,type:"大吉",poem:["百年修得同船渡","千年修得共枕眠","今生缘分天注定","恩爱夫妻万万年"],jie:"此签大吉，百年好合。今生姻缘是累世修来的福分。珍惜彼此，恩爱绵长。"},
+  {num:28,type:"中吉",poem:["春蚕到死丝方尽","此情绵绵无绝期","一片真心终不负","守得花开见佳期"],jie:"此签中吉，真心不负。一片痴情终将得到回报。坚持付出，佳期不远。"},
+  {num:29,type:"中平",poem:["花开堪折直须折","莫待无花空折枝","缘来缘去莫执着","随心随性最相宜"],jie:"此签中平，把握当下。有缘时珍惜，无缘时放手。执着反而苦，随缘最自在。"},
+  {num:30,type:"上吉",poem:["双星伴月照长空","情深似海意相同","此去定能长厮守","不负苍天不负卿"],jie:"此签上吉，双星伴月。两人感情深厚坚定，必能长久相守。不负此生情缘。"},
+  {num:31,type:"中吉",poem:["一枝红杏出墙来","满园春色关不住","桃花运势正当时","好好把握莫辜负"],jie:"此签中吉，桃花运旺。近期异性缘极好，身边不乏追求者。认真筛选，择优而从。"},
+  {num:32,type:"下下",poem:["劳燕分飞各西东","此情可待成追忆","强求无益徒伤悲","不如各自寻前程"],jie:"此签下下，缘尽情散。此段感情恐难维系，强求无益。各自安好，也是一种成全。"},
+  {num:33,type:"上吉",poem:["有凤来仪百鸟朝","良人将至喜眉梢","不须四处苦寻觅","缘到自然花自开"],jie:"此签上吉，良人将至。不必刻意寻找，缘分到了自然水到渠成。保持自己最好的状态。"},
+  {num:34,type:"中平",poem:["两情若是长久时","又岂在朝朝暮暮","聚少离多莫怨叹","真心不改终团聚"],jie:"此签中平，聚少离多。虽然相聚时间有限，但真心不变。信任是维系感情的根基。"},
+  {num:35,type:"中吉",poem:["枯木逢春又发芽","旧爱重燃似桃花","过去伤痛皆放下","新的开始到天涯"],jie:"此签中吉，枯木逢春。曾经冷淡的感情将重新焕发生机。给彼此一个新的开始。"},
+  {num:36,type:"大吉",poem:["红娘牵线月老笑","珠联璧合天地好","此签得之姻缘定","白首不离到终老"],jie:"此签大吉，珠联璧合。此乃上上姻缘，天造地设。不论相亲、恋爱、结婚皆大吉。"},
+  {num:37,type:"中下",poem:["情深缘浅奈若何","相见不如不见多","此时退步转身去","莫让深情化苦河"],jie:"此签中下，情深缘浅。并非所有深情都能换来回报，适时退出也是智慧。"},
+  {num:38,type:"中吉",poem:["青梅竹马两无猜","长大成人情自来","莫道身边无好景","最美风景在身旁"],jie:"此签中吉，近水楼台。真爱也许就在身边。留心周围熟悉的人，或有意外收获。"},
+  {num:39,type:"上吉",poem:["花好月圆人团聚","春风得意马蹄疾","此去一路皆坦途","佳人相伴笑盈盈"],jie:"此签上吉，花好月圆。感情事业双丰收，有佳人相伴左右。此为美满幸福之兆。"},
+  {num:40,type:"中平",poem:["一见钟情未可知","日久生情方为真","莫被初见迷了眼","细水长流最养心"],jie:"此签中平，细水长流。不要过于追求一见钟情，真正的感情需要时间培养。"},
+  {num:41,type:"中吉",poem:["红豆生南国","春来发几枝","愿君多采撷","此物最相思"],jie:"此签中吉，相思情浓。远方有人深深牵挂着你。鸿雁传书，情意绵绵。"},
+  {num:42,type:"大吉",poem:["金风玉露一相逢","便胜却人间无数","此番相遇非偶然","月老牵线定终生"],jie:"此签大吉，金风玉露。即将遇到命中注定之人，一见便知是此生挚爱。把握良缘。"},
+  {num:43,type:"中下",poem:["痴心总被无情恼","一片深情付流水","回头看看来时路","值不值得自己知"],jie:"此签中下，付出无回报。在这段感情中你付出太多却收获太少。是时候为自己考虑了。"},
+  {num:44,type:"上吉",poem:["鸿案相庄举案齐","夫唱妇随乐融融","此签主定婚姻美","恩爱无疑到白头"],jie:"此签上吉，举案齐眉。已婚者夫妻恩爱和睦，未婚者将遇到贤良伴侣。家庭美满。"},
+  {num:45,type:"中平",poem:["画眉深浅入时无","妆罢低声问夫婿","爱情之中需磨合","包容体谅是功夫"],jie:"此签中平，需要磨合。感情中难免有摩擦，包容体谅是维系关系的关键。"},
+  {num:46,type:"中吉",poem:["凤凰于飞鸣锵锵","梧桐相待有栖凰","你是梧桐他是凤","相互等待最芬芳"],jie:"此签中吉，凤凰于飞。彼此都在等待对方。主动迈出一步，便是花好月圆。"},
+  {num:47,type:"下下",poem:["镜花水月一场空","枕边之人心不同","莫再自欺兼欺人","早日清醒早日轻"],jie:"此签下下，镜花水月。这段感情中存在欺骗或自欺。清醒面对现实，方能获得真正的幸福。"},
+  {num:48,type:"大吉",poem:["天仙配就在今宵","牛郎织女渡鹊桥","人间最美是真情","月老保佑永不凋"],jie:"此签大吉，天仙相配。此乃至上姻缘之签。所有感情相关之事，皆为大吉大利。"},
+  {num:49,type:"上吉",poem:["三生石上刻前缘","今世重逢在眼前","莫说相逢恨太晚","余生漫漫共婵娟"],jie:"此签上吉，三生之缘。此乃累世因缘，今生重逢。好好珍惜，共度余生。"},
+  {num:50,type:"中平",poem:["情到浓时情转薄","热恋过后归平淡","平淡之中见真情","柴米油盐也浪漫"],jie:"此签中平，归于平淡。热恋期已过，但平淡才是真。在日常中经营感情，方可长久。"},
+  {num:51,type:"中吉",poem:["蒹葭苍苍白露霜","所谓伊人在水方","溯洄从之道阻长","溯游从之在水央"],jie:"此签中吉，佳人可期。心中的理想伴侣虽一时难得，但坚持追寻必有回报。"},
+  {num:52,type:"中下",poem:["落花有意随流水","流水无心恋落花","不是你的莫强求","转身便是新天涯"],jie:"此签中下，落花流水。你的心意对方未必领情。与其苦苦纠缠，不如潇洒转身。"},
+  {num:53,type:"大吉",poem:["月老祠前求红线","一求一个准无偏","此签灵验胜万千","姻缘美满在今年"],jie:"此签大吉，有求必应。今年之内必有重大感情进展。此签极为灵验，诚心必应。"},
+  {num:54,type:"上吉",poem:["关关雎鸠河之洲","窈窕淑女君子求","此去求之必得之","良缘美眷乐无忧"],jie:"此签上吉，求之必得。主动追求心仪之人，必能如愿以偿。大胆表达爱意。"},
+  {num:55,type:"中平",poem:["相濡以沫不如忘","两看相厌不如散","感情之事莫勉强","顺其自然心才安"],jie:"此签中平，顺其自然。若感情已成负担，不必勉强维持。有时放手也是一种爱。"},
+  {num:56,type:"中吉",poem:["春花秋月何时了","往事知多少","小楼昨夜又东风","旧爱新欢各不同"],jie:"此签中吉，新旧交替。旧的感情将告一段落，新的情缘正在萌芽。放下过去迎接未来。"},
+  {num:57,type:"上吉",poem:["鸾凤和鸣在此间","相亲相爱不厌倦","此去夫妻同心力","家和万事自然圆"],jie:"此签上吉，鸾凤和鸣。夫妻同心，其利断金。家庭和睦幸福，万事皆圆满。"},
+  {num:58,type:"中下",poem:["望穿秋水人未归","空余牵挂与相思","此人心思不在你","早些释怀早些安"],jie:"此签中下，空等无果。你所等待的人心不在此。及早看清，释然方得安宁。"},
+  {num:59,type:"中吉",poem:["两情相悦心相知","执子之手不分离","纵使前路多风雨","携手同行永不移"],jie:"此签中吉，两情相悦。彼此心意相通，可携手共进。纵有风雨，也无所畏惧。"},
+  {num:60,type:"大吉",poem:["月老灵签六十终","姻缘圆满乐融融","有缘千里来相会","天赐良缘万事通"],jie:"此签大吉，圆满之签。一切感情事宜皆得圆满。月老庇佑，姻缘天成，福泽深远。"}
+];
+
+let isDrawing = false;
+
+function drawLot() {
+  if (isDrawing) return;
+  isDrawing = true;
+
+  const btn = document.getElementById('drawBtn');
+  const hint = document.getElementById('hint');
+  const area = document.getElementById('threadArea');
+  const resultEl = document.getElementById('result');
+
+  btn.disabled = true;
+  hint.textContent = '红线牵动中...';
+  hint.style.animation = 'none';
+  resultEl.classList.remove('show');
+
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+  area.classList.add('shaking');
+
+  setTimeout(() => {
+    area.classList.remove('shaking');
+
+    const flash = document.createElement('div');
+    flash.className = 'flash';
+    document.body.appendChild(flash);
+    setTimeout(() => flash.remove(), 600);
+
+    setTimeout(() => {
+      const lot = lots[Math.floor(Math.random() * lots.length)];
+      showResult(lot);
+      isDrawing = false;
+      btn.disabled = false;
+      hint.textContent = '点击红线 · 再次求签';
+      hint.style.animation = 'pulse 2s ease-in-out infinite';
+    }, 400);
+  }, 2200);
+}
+
+function showResult(lot) {
+  const el = document.getElementById('result');
+  const typeClass = getTypeClass(lot.type);
+
+  el.innerHTML = `
+    <div class="result-card">
+      <div class="result-num">第 ${lot.num} 签</div>
+      <div class="result-type ${typeClass}">${lot.type}签</div>
+      <div class="divider"></div>
+      <div class="poem">
+        ${lot.poem.map(l => l + '<br>').join('')}
+      </div>
+      <div class="divider"></div>
+      <div class="interpretation">
+        <h3>月老指点</h3>
+        <p>${lot.jie}</p>
+      </div>
+      <div class="interpretation" style="margin-top:10px;">
+        <h3>签 意</h3>
+        <div class="detail-grid">
+          <div class="detail-item">姻缘：<span>${getAdvice(lot.type,'姻')}</span></div>
+          <div class="detail-item">桃花：<span>${getAdvice(lot.type,'桃')}</span></div>
+          <div class="detail-item">复合：<span>${getAdvice(lot.type,'复')}</span></div>
+          <div class="detail-item">表白：<span>${getAdvice(lot.type,'白')}</span></div>
+          <div class="detail-item">婚嫁：<span>${getAdvice(lot.type,'婚')}</span></div>
+          <div class="detail-item">家庭：<span>${getAdvice(lot.type,'家')}</span></div>
+        </div>
+      </div>
+    </div>
+    <button class="btn-again" onclick="drawLot()">再 求 一 签</button>
+  `;
+
+  requestAnimationFrame(() => {
+    el.classList.add('show');
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+}
+
+function getTypeClass(type) {
+  if (type === '大吉') return 'type-大吉';
+  if (type === '上吉') return 'type-上吉';
+  if (type === '中吉') return 'type-中吉';
+  if (type === '中平') return 'type-中平';
+  if (type === '中下') return 'type-中下';
+  if (type === '下下') return 'type-下下';
+  return 'type-中平';
+}
+
+function getAdvice(type, cat) {
+  const a = {
+    '大吉': {姻:'天赐良缘，美满幸福',桃:'桃花朵朵开',复:'破镜重圆',白:'一表即成',婚:'大吉大利',家:'和睦美满'},
+    '上吉': {姻:'良缘可期',桃:'异性缘极佳',复:'有望复合',白:'成功率高',婚:'宜嫁娶',家:'家庭和乐'},
+    '中吉': {姻:'缘分将至',桃:'桃花渐旺',复:'尚有机会',白:'可尝试',婚:'择日而行',家:'小有欢喜'},
+    '中平': {姻:'随缘为好',桃:'平平淡淡',复:'顺其自然',白:'再等等',婚:'不急不缓',家:'平安无事'},
+    '中下': {姻:'暂无良缘',桃:'桃花未开',复:'难以如愿',白:'暂缓表白',婚:'宜推迟',家:'需多沟通'},
+    '下下': {姻:'缘分未到',桃:'宜修身养性',复:'不宜',白:'时机不对',婚:'暂不宜',家:'多忍让包容'}
+  };
+  return (a[type] && a[type][cat]) || '顺其自然';
+}
+</script>
+</body>
+</html>
