@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>财神灵签</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&family=Ma+Shan+Zheng&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    min-height: 100vh;
+    background: #0d0800;
+    color: #fff0e6;
+    font-family: 'Noto Serif SC', serif;
+    overflow-x: hidden;
+  }
+
+  .bg-layer {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(ellipse at 50% 20%, #1a1000 0%, #0d0800 70%);
+    z-index: 0;
+  }
+
+  /* 金币雨粒子 */
+  .coin-container {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 1; overflow: hidden;
+  }
+  .gold-coin {
+    position: absolute;
+    width: 8px; height: 8px;
+    background: radial-gradient(circle, rgba(255,215,0,0.7), rgba(184,134,11,0.3));
+    border-radius: 50%;
+    animation: coinFall linear infinite;
+  }
+  @keyframes coinFall {
+    0% { transform: translateY(-10vh) translateX(0) rotate(0deg) scale(1); opacity: 0; }
+    10% { opacity: 0.8; }
+    80% { opacity: 0.4; }
+    100% { transform: translateY(110vh) translateX(40px) rotate(720deg) scale(0.3); opacity: 0; }
+  }
+
+  .container {
+    position: relative; z-index: 2;
+    max-width: 600px; margin: 0 auto; padding: 20px;
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+  }
+
+  .header {
+    text-align: center; margin-top: 40px; margin-bottom: 30px;
+  }
+  .header h1 {
+    font-family: 'Ma Shan Zheng', cursive;
+    font-size: 3rem; letter-spacing: 12px;
+    color: #ffd700;
+    text-shadow: 0 0 30px rgba(255,215,0,0.5), 0 0 60px rgba(255,215,0,0.3);
+  }
+  .header p {
+    margin-top: 8px; font-size: 0.95rem; color: #c9a050;
+    letter-spacing: 4px;
+  }
+  .header .sub {
+    margin-top: 6px; font-size: 0.8rem; color: #a08040;
+    letter-spacing: 6px;
+  }
+
+  /* 元宝区域 */
+  .ingot-area {
+    display: flex; flex-direction: column; align-items: center;
+    margin-bottom: 30px; position: relative;
+  }
+  .ingot-wrapper {
+    width: 200px; height: 200px;
+    cursor: pointer; position: relative;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.3s;
+  }
+  .ingot-wrapper:hover { transform: scale(1.05); }
+
+  .ingot {
+    width: 200px; height: 200px;
+    position: relative;
+  }
+  .ingot svg {
+    width: 100%; height: 100%;
+    filter: drop-shadow(0 0 15px rgba(255,215,0,0.4));
+  }
+
+  /* 元宝摇晃动画 */
+  .shaking .ingot svg {
+    animation: shakeIngot 0.12s ease-in-out infinite;
+    filter: drop-shadow(0 0 30px rgba(255,215,0,0.8));
+  }
+  @keyframes shakeIngot {
+    0%, 100% { transform: rotate(0deg) scale(1); }
+    25% { transform: rotate(4deg) scale(1.04); }
+    50% { transform: rotate(-4deg) scale(0.97); }
+    75% { transform: rotate(3deg) scale(1.02); }
+  }
+
+  .hint {
+    font-size: 0.9rem; color: #c9a050; margin-top: 16px;
+    letter-spacing: 3px;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+  }
+
+  .btn {
+    margin-top: 16px; padding: 12px 50px;
+    font-family: 'Noto Serif SC', serif;
+    font-size: 1.1rem; letter-spacing: 8px;
+    border: none; border-radius: 30px;
+    background: linear-gradient(135deg, #b8860b, #daa520, #b8860b);
+    color: #fff0e6; cursor: pointer;
+    box-shadow: 0 0 20px rgba(255,215,0,0.3);
+    transition: all 0.3s;
+  }
+  .btn:hover { box-shadow: 0 0 30px rgba(255,215,0,0.6); transform: scale(1.05); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  /* 闪光 */
+  .flash {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(circle, rgba(255,230,150,0.4), transparent);
+    z-index: 100; pointer-events: none;
+    animation: flashAnim 0.6s ease-out forwards;
+  }
+  @keyframes flashAnim {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  /* 结果 */
+  .result {
+    width: 100%; max-width: 500px;
+    opacity: 0; transform: translateY(40px);
+    transition: all 0.8s ease;
+    pointer-events: none;
+  }
+  .result.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+
+  .result-card {
+    background: linear-gradient(135deg, #1a1000, #2a1a08, #1a1000);
+    border: 1px solid rgba(255,215,0,0.3);
+    border-radius: 16px;
+    padding: 30px 24px;
+    box-shadow: 0 0 40px rgba(255,215,0,0.1);
+  }
+  .result-num {
+    text-align: center; font-size: 1rem;
+    color: #c9a050; letter-spacing: 4px;
+  }
+  .result-type {
+    text-align: center; font-size: 1.8rem;
+    font-family: 'Ma Shan Zheng', cursive;
+    margin: 8px 0; letter-spacing: 6px;
+  }
+  .type-大吉 { color: #ffd700; text-shadow: 0 0 20px rgba(255,215,0,0.6); }
+  .type-上吉 { color: #ffb347; text-shadow: 0 0 15px rgba(255,179,71,0.5); }
+  .type-中吉 { color: #daa520; text-shadow: 0 0 12px rgba(218,165,32,0.4); }
+  .type-中平 { color: #b8960b; }
+  .type-中下 { color: #8a6a3a; }
+  .type-下下 { color: #5a4a2a; }
+
+  .divider {
+    height: 1px; margin: 16px 0;
+    background: linear-gradient(90deg, transparent, #b8860b, transparent);
+  }
+
+  .poem {
+    text-align: center;
+    font-family: 'Ma Shan Zheng', cursive;
+    font-size: 1.3rem; line-height: 2.2;
+    color: #f0d080; letter-spacing: 2px;
+  }
+
+  .interpretation h3 {
+    text-align: center; font-size: 1rem;
+    color: #daa520; letter-spacing: 8px;
+    margin-bottom: 10px;
+  }
+  .interpretation p {
+    font-size: 0.92rem; line-height: 1.9;
+    color: #c9a050; text-align: center;
+  }
+
+  .detail-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 8px; margin-top: 8px;
+  }
+  .detail-item {
+    font-size: 0.85rem; color: #a08040;
+    padding: 6px 10px;
+    border-radius: 6px;
+    background: rgba(255,215,0,0.06);
+  }
+  .detail-item span { color: #f0d080; }
+
+  .btn-again {
+    display: block; margin: 24px auto 60px;
+    padding: 10px 40px;
+    font-family: 'Noto Serif SC', serif;
+    font-size: 0.95rem; letter-spacing: 6px;
+    border: 1px solid #b8860b;
+    border-radius: 24px;
+    background: transparent;
+    color: #daa520; cursor: pointer;
+    transition: all 0.3s;
+  }
+  .btn-again:hover {
+    background: rgba(255,215,0,0.1);
+    box-shadow: 0 0 15px rgba(255,215,0,0.3);
+  }
+
+  /* 导航链接 */
+  .nav-link-l {
+    position: fixed; top: 16px; left: 16px;
+    color: #8a6a3a; font-size: 0.85rem;
+    text-decoration: none; letter-spacing: 2px;
+    z-index: 10; transition: color 0.3s;
+  }
+  .nav-link-l:hover { color: #ffd700; }
+  .nav-link-r {
+    position: fixed; top: 16px; right: 16px;
+    color: #8a6a3a; font-size: 0.85rem;
+    text-decoration: none; letter-spacing: 2px;
+    z-index: 10; transition: color 0.3s;
+  }
+  .nav-link-r:hover { color: #ffd700; }
+
+  @media (max-width: 480px) {
+    .header h1 { font-size: 2.4rem; letter-spacing: 8px; }
+    .poem { font-size: 1.1rem; }
+    .result-card { padding: 24px 16px; }
+    .ingot-wrapper { width: 170px; height: 170px; }
+    .ingot { width: 170px; height: 170px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-layer"></div>
+<div class="coin-container" id="coinContainer"></div>
+
+<a href="index.html" class="nav-link-l">← 观音灵签</a>
+<a href="guandi.html" class="nav-link-r">关帝灵签 →</a>
+<a href="lvzu.html" class="nav-link-r" style="top:38px">吕祖灵签 →</a>
+<a href="wenwang.html" class="nav-link-r" style="top:60px">文王六十四卦 →</a>
+<a href="yuelo.html" class="nav-link-r" style="top:82px">月老灵签 →</a>
+
+<div class="container">
+  <div class="header">
+    <h1>财神灵签</h1>
+    <p>五路财神 · 招财进宝</p>
+    <div class="sub">诚心祈愿 · 财运亨通</div>
+  </div>
+
+  <div class="ingot-area" id="ingotArea">
+    <div class="ingot-wrapper" id="ingotWrapper" onclick="drawLot()">
+      <div class="ingot">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="ingotGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#ffd700;stop-opacity:1"/>
+              <stop offset="30%" style="stop-color:#fff0a0;stop-opacity:1"/>
+              <stop offset="50%" style="stop-color:#ffd700;stop-opacity:1"/>
+              <stop offset="70%" style="stop-color:#ffec80;stop-opacity:1"/>
+              <stop offset="100%" style="stop-color:#b8860b;stop-opacity:1"/>
+            </linearGradient>
+            <linearGradient id="ingotDark" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" style="stop-color:#daa520;stop-opacity:1"/>
+              <stop offset="100%" style="stop-color:#8b6914;stop-opacity:1"/>
+            </linearGradient>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="3" result="blur"/>
+              <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+            </filter>
+          </defs>
+          <!-- 外圈光环 -->
+          <circle cx="100" cy="100" r="85" fill="none" stroke="url(#ingotGrad)" stroke-width="2" opacity="0.3"/>
+          <!-- 元宝主体 -->
+          <path d="M50 120 Q55 95, 75 90 Q90 85, 100 75 Q110 85, 125 90 Q145 95, 150 120 Q140 130, 100 135 Q60 130, 50 120 Z"
+                fill="url(#ingotGrad)" stroke="#b8860b" stroke-width="1.5" filter="url(#glow)"/>
+          <!-- 元宝上沿弧 -->
+          <path d="M60 110 Q70 88, 100 80 Q130 88, 140 110"
+                fill="none" stroke="#fff0a0" stroke-width="1" opacity="0.5"/>
+          <!-- 元宝翅膀左 -->
+          <path d="M50 120 Q40 108, 45 95 Q50 100, 60 105"
+                fill="url(#ingotGrad)" stroke="#b8860b" stroke-width="1"/>
+          <!-- 元宝翅膀右 -->
+          <path d="M150 120 Q160 108, 155 95 Q150 100, 140 105"
+                fill="url(#ingotGrad)" stroke="#b8860b" stroke-width="1"/>
+          <!-- 底部阴影 -->
+          <ellipse cx="100" cy="138" rx="45" ry="6" fill="rgba(0,0,0,0.3)"/>
+          <!-- 财字 -->
+          <text x="100" y="70" text-anchor="middle" font-family="Ma Shan Zheng, cursive" font-size="24" fill="#ffd700" opacity="0.85">财</text>
+          <!-- 装饰小元宝左 -->
+          <path d="M30 155 Q33 145, 42 143 Q48 145, 52 155 Q45 158, 30 155 Z"
+                fill="url(#ingotDark)" opacity="0.5"/>
+          <!-- 装饰小元宝右 -->
+          <path d="M148 155 Q151 145, 160 143 Q166 145, 170 155 Q163 158, 148 155 Z"
+                fill="url(#ingotDark)" opacity="0.5"/>
+        </svg>
+      </div>
+    </div>
+    <p class="hint" id="hint">点击元宝 · 诚心求签</p>
+    <button class="btn" onclick="drawLot()" id="drawBtn">求 签</button>
+  </div>
+
+  <div class="result" id="result"></div>
+</div>
+
+<script>
+// 金币雨粒子
+const cCtn = document.getElementById('coinContainer');
+for (let i = 0; i < 25; i++) {
+  const c = document.createElement('div');
+  c.className = 'gold-coin';
+  const size = 4 + Math.random() * 8;
+  c.style.cssText = `
+    left: ${Math.random() * 100}%;
+    top: ${-10 + Math.random() * 20}%;
+    width: ${size}px;
+    height: ${size}px;
+    animation-duration: ${8 + Math.random() * 10}s;
+    animation-delay: ${Math.random() * 8}s;
+  `;
+  cCtn.appendChild(c);
+}
+
+// ====== 财神灵签 62 签 ======
+const lots = [
+  {num:1,type:"大吉",poem:["五路财神齐临门","金银满屋喜纷纷","从此财源滚滚来","富贵荣华享不尽"],jie:"此签大吉，五路财神齐至。财运极旺，正财偏财皆有大进。所求财事，必获丰厚回报。"},
+  {num:2,type:"上吉",poem:["春风得意马蹄疾","一日看尽长安花","财运亨通步步高","日进斗金福满家"],jie:"此签上吉，财运亨通。近期收入看涨，投资有利。把握机会，日进斗金不是梦。"},
+  {num:3,type:"中吉",poem:["细水长流终成河","积少成多贵坚持","莫嫌眼前利润薄","聚沙成塔富可期"],jie:"此签中吉，细水长流。虽非暴利，但稳步积累终成大富。勤俭持家，财富渐长。"},
+  {num:4,type:"中平",poem:["守得住来方有财","莫将本钱轻易抛","量入为出是正道","稳扎稳打自安好"],jie:"此签中平，宜守不宜攻。当前不宜大额投资。量入为出，守住本钱为上策。"},
+  {num:5,type:"中下",poem:["屋漏偏逢连夜雨","船迟又遇打头风","此时不宜谋大业","收敛锋芒待转机"],jie:"此签中下，财运不佳。近期恐有破财之忧，不宜投资冒险。节约开支，静待好运。"},
+  {num:6,type:"大吉",poem:["聚宝盆中金满盈","招财进宝喜盈盈","此签得之财运旺","一本万利乐太平"],jie:"此签大吉，聚宝盈门。经商大利，投资必赚。如有生意洽谈，此时出手最佳。"},
+  {num:7,type:"上吉",poem:["东成西就南北通","八方来财聚一宫","贵人相助添财禄","从此不愁米粮空"],jie:"此签上吉，八方来财。有贵人提携，财路大开。合作生意尤为有利。"},
+  {num:8,type:"中平",poem:["一分耕耘一分收","不劳而获是奢求","天道酬勤无捷径","踏实干来自有酬"],jie:"此签中平，天道酬勤。不可妄想一夜暴富。脚踏实地，勤劳致富方为正途。"},
+  {num:9,type:"中吉",poem:["枯木逢春发新枝","困龙得水上天池","财运转机已出现","抓住时机莫迟疑"],jie:"此签中吉，转运之兆。之前的困难即将过去，新的财路正在打开。果断行动。"},
+  {num:10,type:"下下",poem:["竹篮打水一场空","投资冒险必受穷","此时万不可贪念","守住根本度寒冬"],jie:"此签下下，财运极差。切忌投资赌博，否则血本无归。守住现有财产，度过低潮。"},
+  {num:11,type:"上吉",poem:["黄金万两自天来","不求自得是奇才","此签主有意外财","欣然笑纳福门开"],jie:"此签上吉，有意外之财。可能中奖、收到红包或意外收入。好运当头，欣然接受。"},
+  {num:12,type:"中吉",poem:["商贾走南又闯北","诚信经营利自回","薄利多销是王道","口碑载道客盈扉"],jie:"此签中吉，经商有利。以诚信为本，薄利多销。口碑好了，财自然来。"},
+  {num:13,type:"中平",poem:["有舍方能有得来","吝啬守财反遭灾","适度消费非浪费","财去财来自循环"],jie:"此签中平，有舍有得。不要过于吝啬，该花的钱要花。钱财是流通的，过度守财反而不利。"},
+  {num:14,type:"中下",poem:["他人借贷莫轻应","合伙经营须谨慎","此时小人暗中伏","防人之心不可无"],jie:"此签中下，谨防破财。近期不宜借贷给他人，合作投资需格外谨慎。提防小人。"},
+  {num:15,type:"大吉",poem:["财神爷爷笑盈盈","金玉满堂福禄增","此签百签中最利","所求财事必功成"],jie:"此签大吉，财神眷顾。所有与财相关之事皆大吉大利。求财必得，投资必赚。"},
+  {num:16,type:"上吉",poem:["一帆风顺下扬州","满载而归乐悠悠","此去经商定获利","金山银山任君收"],jie:"此签上吉，经商大利。出差谈生意必有斩获，贸易往来利润丰厚。"},
+  {num:17,type:"中吉",poem:["三人同行有我师","合作共赢是良知","一人之力终有限","携手同行利更奇"],jie:"此签中吉，合作有利。单干不如合伙，找对合作伙伴可事半功倍，财富倍增。"},
+  {num:18,type:"中平",poem:["月有阴晴圆缺时","财有起伏涨落期","眼前虽然不如意","耐心等待转机至"],jie:"此签中平，财运平淡。目前收入一般，但不必焦虑。财运如潮，起伏是常态。"},
+  {num:19,type:"中下",poem:["贪多嚼不烂","心大蛇吞象","此时宜收缩","莫做黄粱梦"],jie:"此签中下，不宜贪多。当前投资战线过长，需收缩。集中精力做好一件事。"},
+  {num:20,type:"上吉",poem:["瑞雪兆丰年","五谷皆丰满","此签主丰收","辛苦有回报"],jie:"此签上吉，丰收之兆。之前的付出终于有了回报。工资、奖金、分红都将令人满意。"},
+  {num:21,type:"中吉",poem:["千里马遇伯乐知","明珠有日放光时","你的才华值万金","贵人一点化金池"],jie:"此签中吉，才华变现。你的技能和专长将为你带来可观收入。遇贵人提点更佳。"},
+  {num:22,type:"大吉",poem:["金蟾献瑞财气浓","铜钱串串响叮咚","此签财运通四海","东西南北皆亨通"],jie:"此签大吉，金蟾献瑞。四方来财，财运极盛。不论做什么生意，皆有利可图。"},
+  {num:23,type:"中平",poem:["君子爱财取有道","不义之财不可要","正道生财虽慢些","安稳长久胜千遭"],jie:"此签中平，取财有道。切勿走旁门左道，正道虽慢但安稳。不义之财招祸患。"},
+  {num:24,type:"中吉",poem:["开源节流两手抓","既要赚钱也要花","投资自己最划算","学成归来价更加"],jie:"此签中吉，投资自己。学习新技能、提升能力是最好的投资。先投资自己，财富随之而来。"},
+  {num:25,type:"上吉",poem:["左手金来右手银","财神到此笑吟吟","此番定有大进项","喜从天降乐开心"],jie:"此签上吉，财喜双至。近期将有大额进账。可能是项目奖金、合同回款或其他大进项。"},
+  {num:26,type:"中下",poem:["纸醉金迷不长久","花天酒地空回首","此时应当省吃俭","莫到无钱方知愁"],jie:"此签中下，过度消费。你的花销可能已超出承受范围。及时止损，开始节俭。"},
+  {num:27,type:"大吉",poem:["日日生财财不断","年年有余余更添","财神庇佑福泽广","子孙万代享丰年"],jie:"此签大吉，长久之财。不仅眼前财运好，而且福泽绵长。所建基业可惠及后代。"},
+  {num:28,type:"中吉",poem:["一技在手走天下","不怕没有生财法","凭本事吃饭最稳","铁饭碗靠自己打"],jie:"此签中吉，靠技术生财。你的专业技能就是最好的财富来源。精益求精，自然不愁收入。"},
+  {num:29,type:"中平",poem:["知足常乐是真理","比上不足下有余","莫羡他人金满屋","自有自家好光景"],jie:"此签中平，知足常乐。不要盲目攀比。目前的经济状况虽不富裕，但也足够安稳。"},
+  {num:30,type:"上吉",poem:["时来运转不由人","财源滚滚似潮临","把握当下好光景","一年更比一年新"],jie:"此签上吉，时来运转。财运正在上升期，收入将逐年增长。把握时机，大胆进取。"},
+  {num:31,type:"中吉",poem:["种下梧桐引凤来","筑好巢穴财自来","先把根基打牢固","高楼万丈平地起"],jie:"此签中吉，打好根基。现在要做的是打好基础。根基稳了，大财自然来。急于求成反而不美。"},
+  {num:32,type:"下下",poem:["风卷残云日无光","破财消灾莫惊慌","钱财身外之物也","留得青山有柴烧"],jie:"此签下下，恐有破财。可能遭遇经济损失，但不必过于慌张。破财消灾，留得青山在。"},
+  {num:33,type:"上吉",poem:["锦鲤跳龙门","一跃化为神","财运今日起","扶摇直上云"],jie:"此签上吉，财运飞跃。将有质的突破，收入可能跨上新台阶。跳槽、转行皆有利。"},
+  {num:34,type:"中平",poem:["不见兔子不撒鹰","无利可图莫强行","看准了再出手狠","一击必中方为能"],jie:"此签中平，谨慎出手。当前不要盲目投资。先观察、后出手，看准时机再行动。"},
+  {num:35,type:"中吉",poem:["他山之石可攻玉","借鸡生蛋有门路","善用资源巧生财","四两拨动千斤富"],jie:"此签中吉，巧用资源。善于借助他人的资源和平台。四两拨千斤，以小博大有望。"},
+  {num:36,type:"大吉",poem:["财神驾到满堂红","恭喜发财乐无穷","此签得之百事利","金银珠宝塞满笼"],jie:"此签大吉，恭喜发财。此乃至吉之签，所有财运事宜皆极为顺利。大赚特赚之兆。"},
+  {num:37,type:"中下",poem:["冰冻三尺非一日","解冻还需慢慢来","财务困难暂时过","节衣缩食渡难关"],jie:"此签中下，财务紧张。可能面临资金周转困难。需要开源节流，慢慢恢复元气。"},
+  {num:38,type:"中吉",poem:["旧屋翻新换新颜","房产置业正当前","安居方能乐业去","有了根基财更全"],jie:"此签中吉，置业有利。当前适合购房置业或装修翻新。安居乐业，是生财的根基。"},
+  {num:39,type:"上吉",poem:["天上掉下馅饼来","不偏不倚正好裁","莫说天上无好事","财神有意送福来"],jie:"此签上吉，意外得财。可能收到意想不到的财富。不论是中奖、遗产还是馈赠，欣然接受。"},
+  {num:40,type:"中平",poem:["一亩三分地","精耕细作种","莫贪多求大","小富即安乐"],jie:"此签中平，小富即安。不必追求大富大贵，在自己的领域深耕。小而美，同样是成功。"},
+  {num:41,type:"中吉",poem:["人无横财不富","马无夜草不肥","正道偏财皆可得","只要时机对得飞"],jie:"此签中吉，偏财可期。除了正常收入外，可能有额外收入。兼职、副业值得一试。"},
+  {num:42,type:"大吉",poem:["黄金铺路任君行","财气冲天耀门庭","此签一出财运盛","所求皆得万事兴"],jie:"此签大吉，黄金铺路。财运极盛，无论求正财偏财皆可如愿。大胆决策，必获丰收。"},
+  {num:43,type:"中下",poem:["此路不通换条走","死守一处难生财","灵活变通方有路","换个思路天地开"],jie:"此签中下，当前财路不通。需要灵活变通，固守旧路已无利可图。考虑转型或换方向。"},
+  {num:44,type:"上吉",poem:["酒香不怕巷子深","好货自有识货人","你的产品有市场","财源广进利翻新"],jie:"此签上吉，产品有市场。如有创业、开店、卖货之事，市场反响将超预期。"},
+  {num:45,type:"中平",poem:["百川归海有时尽","万事如意不常全","收支平衡已不易","安安稳稳过今年"],jie:"此签中平，收支平衡。今年财运平平，不赚不亏已是好事。安稳度日，来年更好。"},
+  {num:46,type:"中吉",poem:["千金散尽还复来","豪气干云壮士怀","舍得投入方有报","大方之人财更来"],jie:"此签中吉，舍得生财。在该投入的地方大方些，舍得花钱才能赚更多钱。格局决定财富。"},
+  {num:47,type:"下下",poem:["覆水难收悔已迟","投资失误莫再追","及时止损是智慧","亡羊补牢未为迟"],jie:"此签下下，及时止损。如有亏损项目，当断则断。继续投入只会越陷越深。"},
+  {num:48,type:"大吉",poem:["财源茂盛达三江","生意兴隆通四海","此签主发横财运","一夜之间变富翁"],jie:"此签大吉，横财运至。可能有意外大财入账。此签极为灵验，财运挡都挡不住。"},
+  {num:49,type:"上吉",poem:["股市楼市皆看涨","投资理财正当行","此时出手必有赚","犹豫不决误良机"],jie:"此签上吉，投资大利。当前市场形势有利，适合投资理财。果断出手，莫失良机。"},
+  {num:50,type:"中平",poem:["吃得苦中苦","方为人上人","眼前苦一些","将来甜如蜜"],jie:"此签中平，先苦后甜。目前收入可能不太理想，但坚持努力，将来必有丰厚回报。"},
+  {num:51,type:"中吉",poem:["众人拾柴火焰高","团队生财力更强","一人富不如众富","共同致富最久长"],jie:"此签中吉，团队生财。带团队、合伙经营比单打独斗更有利。众人合力，财富更多。"},
+  {num:52,type:"中下",poem:["天有不测风云事","人有旦夕祸福临","未雨绸缪备储蓄","有备无患度时艰"],jie:"此签中下，需防意外开支。可能有突发状况导致破费。平时多存些应急资金。"},
+  {num:53,type:"上吉",poem:["门前车马日日多","生意兴隆客盈门","此签主旺人气财","越来越好年胜年"],jie:"此签上吉，生意兴隆。如有店铺、生意，客源将大增。人气就是财气，越来越好。"},
+  {num:54,type:"中吉",poem:["退一步海阔天空","让三分心平气和","生意场上和为贵","和气生财利更多"],jie:"此签中吉，和气生财。在商业往来中和善待人，让利于人反得更多。切忌斤斤计较。"},
+  {num:55,type:"大吉",poem:["摇钱树上金叶飘","聚宝盆中宝光耀","财神爷爷亲点名","你是今年大财到"],jie:"此签大吉，财神钦点。今年你是被财神眷顾之人，大财小财皆顺利。放心大胆谋财。"},
+  {num:56,type:"中平",poem:["不怕慢来只怕站","一步一个脚印走","财富积累非一日","持之以恒终成功"],jie:"此签中平，慢就是快。财富积累需要时间和耐心。不要急于求成，稳步前行。"},
+  {num:57,type:"上吉",poem:["柳暗花明又一村","绝处逢生有贵人","资金困难将解决","否极泰来财运新"],jie:"此签上吉，困难将解。如正面临资金问题，很快就有转机。贵人出手相助，否极泰来。"},
+  {num:58,type:"中下",poem:["借人钱财需三思","担保之事莫沾身","看似助人实害己","一不小心陷深坑"],jie:"此签中下，不宜借贷担保。近期切勿为他人做经济担保，借出的钱也恐难以收回。"},
+  {num:59,type:"中吉",poem:["老树发新芽","旧业换新法","创新是出路","改革财自发"],jie:"此签中吉，创新生财。传统的生意模式需要革新。拥抱新方法、新技术，财路将更宽。"},
+  {num:60,type:"大吉",poem:["盆满钵满喜洋洋","金银堆积如山冈","此签得之财运极","年末数钱数到忙"],jie:"此签大吉，盆满钵满。财运极佳，收入将超出预期。年末盘点时，必定满意而归。"},
+  {num:61,type:"上吉",poem:["一分投入十分报","百倍回报今朝到","此签主利投资事","放手一搏天助到"],jie:"此签上吉，回报丰厚。此时投资回报率极高。经过深思熟虑后，可放手一搏。"},
+  {num:62,type:"大吉",poem:["财神灵签六二终","招财进宝满堂红","有缘得此圆满签","一生财运永亨通"],jie:"此签大吉，圆满之签。一切财运事宜皆得圆满。财神庇佑，招财进宝，福泽深远。"}
+];
+
+let isDrawing = false;
+
+function drawLot() {
+  if (isDrawing) return;
+  isDrawing = true;
+
+  const btn = document.getElementById('drawBtn');
+  const hint = document.getElementById('hint');
+  const area = document.getElementById('ingotArea');
+  const resultEl = document.getElementById('result');
+
+  btn.disabled = true;
+  hint.textContent = '财神赐签中...';
+  hint.style.animation = 'none';
+  resultEl.classList.remove('show');
+
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+  area.classList.add('shaking');
+
+  setTimeout(() => {
+    area.classList.remove('shaking');
+
+    const flash = document.createElement('div');
+    flash.className = 'flash';
+    document.body.appendChild(flash);
+    setTimeout(() => flash.remove(), 600);
+
+    setTimeout(() => {
+      const lot = lots[Math.floor(Math.random() * lots.length)];
+      showResult(lot);
+      isDrawing = false;
+      btn.disabled = false;
+      hint.textContent = '点击元宝 · 再次求签';
+      hint.style.animation = 'pulse 2s ease-in-out infinite';
+    }, 400);
+  }, 2200);
+}
+
+function showResult(lot) {
+  const el = document.getElementById('result');
+  const typeClass = getTypeClass(lot.type);
+
+  el.innerHTML = `
+    <div class="result-card">
+      <div class="result-num">第 ${lot.num} 签</div>
+      <div class="result-type ${typeClass}">${lot.type}签</div>
+      <div class="divider"></div>
+      <div class="poem">
+        ${lot.poem.map(l => l + '<br>').join('')}
+      </div>
+      <div class="divider"></div>
+      <div class="interpretation">
+        <h3>财神指点</h3>
+        <p>${lot.jie}</p>
+      </div>
+      <div class="interpretation" style="margin-top:10px;">
+        <h3>签 意</h3>
+        <div class="detail-grid">
+          <div class="detail-item">正财：<span>${getAdvice(lot.type,'正')}</span></div>
+          <div class="detail-item">偏财：<span>${getAdvice(lot.type,'偏')}</span></div>
+          <div class="detail-item">投资：<span>${getAdvice(lot.type,'投')}</span></div>
+          <div class="detail-item">生意：<span>${getAdvice(lot.type,'商')}</span></div>
+          <div class="detail-item">置业：<span>${getAdvice(lot.type,'房')}</span></div>
+          <div class="detail-item">合作：<span>${getAdvice(lot.type,'合')}</span></div>
+        </div>
+      </div>
+    </div>
+    <button class="btn-again" onclick="drawLot()">再 求 一 签</button>
+  `;
+
+  requestAnimationFrame(() => {
+    el.classList.add('show');
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+}
+
+function getTypeClass(type) {
+  if (type === '大吉') return 'type-大吉';
+  if (type === '上吉') return 'type-上吉';
+  if (type === '中吉') return 'type-中吉';
+  if (type === '中平') return 'type-中平';
+  if (type === '中下') return 'type-中下';
+  if (type === '下下') return 'type-下下';
+  return 'type-中平';
+}
+
+function getAdvice(type, cat) {
+  const a = {
+    '大吉': {正:'财源滚滚',偏:'横财可期',投:'大赚特赚',商:'生意兴隆',房:'大利置业',合:'合作大吉'},
+    '上吉': {正:'收入看涨',偏:'有意外财',投:'回报丰厚',商:'客源广进',房:'可以出手',合:'合作有利'},
+    '中吉': {正:'稳步增长',偏:'小有所得',投:'谨慎有利',商:'渐入佳境',房:'可做考虑',合:'宜合作'},
+    '中平': {正:'收支平衡',偏:'不宜强求',投:'观望为主',商:'维持现状',房:'再等等',合:'顺其自然'},
+    '中下': {正:'收入平淡',偏:'不宜妄想',投:'暂勿出手',商:'宜收不宜放',房:'暂不宜',合:'谨慎择伴'},
+    '下下': {正:'节流为上',偏:'切勿赌博',投:'止损为先',商:'闭门守业',房:'不宜',合:'独行为好'}
+  };
+  return (a[type] && a[type][cat]) || '顺其自然';
+}
+</script>
+</body>
+</html>
