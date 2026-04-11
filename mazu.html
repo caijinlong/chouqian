@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>妈祖灵签</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&family=Ma+Shan+Zheng&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    min-height: 100vh;
+    background: #000a12;
+    color: #d8eaf5;
+    font-family: 'Noto Serif SC', serif;
+    overflow-x: hidden;
+  }
+
+  .bg-layer {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(ellipse at 50% 60%, #0a1e30 0%, #000a12 70%);
+    z-index: 0;
+  }
+
+  /* 海雾粒子 */
+  .particle-container {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 1; overflow: hidden;
+  }
+  .particle {
+    position: absolute;
+    border-radius: 50%;
+    animation: seaMist linear infinite;
+  }
+  @keyframes seaMist {
+    0% { transform: translateY(0) translateX(0) scale(1); opacity: 0; }
+    15% { opacity: 0.5; }
+    70% { opacity: 0.15; }
+    100% { transform: translateY(-100vh) translateX(40px) scale(1.8); opacity: 0; }
+  }
+
+  .container {
+    position: relative; z-index: 2;
+    max-width: 600px; margin: 0 auto; padding: 20px;
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+  }
+
+  /* 导航 */
+  .nav-link {
+    position: fixed; top: 16px; left: 16px;
+    color: #4a7a9a; font-size: 0.85rem;
+    text-decoration: none; letter-spacing: 2px;
+    z-index: 10; transition: color 0.3s;
+  }
+  .nav-link:hover { color: #7cc4e8; }
+  .nav-link-r {
+    position: fixed; top: 16px; right: 16px;
+    color: #4a7a9a; font-size: 0.85rem;
+    text-decoration: none; letter-spacing: 2px;
+    z-index: 10; transition: color 0.3s;
+  }
+  .nav-link-r:hover { color: #7cc4e8; }
+
+  /* 标题 */
+  .header { text-align: center; margin-top: 30px; margin-bottom: 10px; }
+  .header h1 {
+    font-family: 'Ma Shan Zheng', cursive;
+    font-size: 3rem;
+    color: #7cc4e8;
+    text-shadow: 0 0 20px rgba(100,180,230,0.4), 0 0 50px rgba(60,140,200,0.15), 0 2px 4px rgba(0,0,0,0.6);
+    letter-spacing: 12px;
+  }
+  .header p {
+    font-size: 0.95rem; color: #5a9ab8; margin-top: 8px;
+    letter-spacing: 4px;
+  }
+  .header .sub {
+    font-size: 0.8rem; color: #3a6a8a; margin-top: 4px;
+    letter-spacing: 2px;
+  }
+
+  /* 灯笼区域 */
+  .lantern-area {
+    display: flex; flex-direction: column; align-items: center;
+    margin-top: 24px; width: 100%;
+  }
+
+  .lantern-wrapper {
+    position: relative; cursor: pointer;
+    width: 220px; height: 240px;
+    margin-bottom: 20px;
+    transition: transform 0.2s;
+  }
+  .lantern-wrapper:hover { transform: scale(1.05); }
+  .lantern-wrapper:active { transform: scale(0.95); }
+
+  .lantern-circle {
+    width: 220px; height: 220px;
+    border-radius: 50%;
+    border: 3px solid rgba(100,180,230,0.3);
+    background: radial-gradient(circle, #061520 20%, #030e18 100%);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 40px rgba(60,140,200,0.12), inset 0 0 30px rgba(60,140,200,0.06);
+    position: relative;
+    overflow: hidden;
+  }
+  .lantern-icon {
+    height: 160px;
+    width: auto;
+    user-select: none;
+    position: relative;
+    z-index: 2;
+    filter: drop-shadow(0 0 12px rgba(100,180,230,0.4)) drop-shadow(0 0 25px rgba(60,140,200,0.2));
+  }
+  .lantern-circle::after {
+    content: '';
+    position: absolute;
+    width: 220px; height: 220px;
+    border: 1px solid rgba(100,180,230,0.08);
+    border-radius: 50%;
+    animation: rotateSlow 40s linear infinite;
+  }
+  @keyframes rotateSlow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  .lantern-text {
+    position: absolute; bottom: 0; width: 100%;
+    text-align: center;
+    font-family: 'Ma Shan Zheng', cursive;
+    font-size: 1rem;
+    color: rgba(100,180,230,0.35);
+    letter-spacing: 8px;
+  }
+
+  /* 摇签动画 */
+  .shaking .lantern-circle {
+    animation: shakeCircle 0.08s ease-in-out infinite alternate;
+    box-shadow: 0 0 60px rgba(60,140,200,0.3), inset 0 0 40px rgba(60,140,200,0.15);
+  }
+  @keyframes shakeCircle {
+    0% { transform: rotate(-2deg) scale(1.02); }
+    100% { transform: rotate(2deg) scale(1.02); }
+  }
+  .shaking .lantern-icon {
+    animation: shakeIcon 0.12s ease-in-out infinite alternate;
+    filter: drop-shadow(0 0 20px rgba(100,180,230,0.7)) drop-shadow(0 0 40px rgba(60,140,200,0.4));
+  }
+  @keyframes shakeIcon {
+    0% { transform: rotate(-8deg); }
+    100% { transform: rotate(8deg); }
+  }
+
+  /* 闪光 */
+  .flash {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(circle, rgba(100,200,255,0.3), transparent 70%);
+    z-index: 5; pointer-events: none;
+    opacity: 0; animation: flashOnce 0.6s ease-out forwards;
+  }
+  @keyframes flashOnce {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  .hint {
+    font-size: 0.9rem; color: #3a6a8a; margin-bottom: 20px;
+    letter-spacing: 2px;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+  }
+
+  .btn {
+    background: linear-gradient(135deg, #0a2a40, #1a5a80, #0a2a40);
+    color: #d8eaf5; border: 1px solid rgba(100,180,230,0.4);
+    padding: 14px 48px;
+    font-family: 'Noto Serif SC', serif;
+    font-size: 1.15rem; font-weight: 700;
+    border-radius: 50px; cursor: pointer;
+    letter-spacing: 6px;
+    box-shadow: 0 4px 20px rgba(60,140,200,0.2);
+    transition: all 0.3s;
+    margin-top: 10px;
+  }
+  .btn:hover {
+    box-shadow: 0 6px 30px rgba(60,140,200,0.4);
+    transform: translateY(-2px);
+  }
+  .btn:active { transform: translateY(0); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  /* 结果区 */
+  .result {
+    width: 100%; max-width: 520px;
+    margin-top: 30px;
+    opacity: 0; transform: translateY(30px);
+    transition: all 0.8s ease;
+    display: none;
+  }
+  .result.show { display: block; opacity: 1; transform: translateY(0); }
+
+  .result-card {
+    background: linear-gradient(135deg, #061520, #0a2030, #061520);
+    border: 2px solid rgba(100,180,230,0.25);
+    border-radius: 16px;
+    padding: 30px 24px;
+    position: relative; overflow: hidden;
+  }
+  .result-card::before {
+    content: '';
+    position: absolute; top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(circle at 50% 50%, rgba(100,200,255,0.03), transparent 60%);
+  }
+
+  .result-num {
+    text-align: center;
+    font-family: 'Ma Shan Zheng', cursive;
+    font-size: 1.3rem;
+    color: #5a9ab8;
+    margin-bottom: 6px;
+  }
+
+  .result-type {
+    text-align: center;
+    font-size: 1.6rem; font-weight: 900;
+    margin-bottom: 8px;
+    letter-spacing: 4px;
+  }
+  .type-上上 { color: #7cc4e8; text-shadow: 0 0 14px rgba(100,180,230,0.5); }
+  .type-上吉 { color: #6ab0d8; text-shadow: 0 0 10px rgba(90,160,210,0.4); }
+  .type-中吉 { color: #5a9ab8; text-shadow: 0 0 8px rgba(80,140,180,0.3); }
+  .type-中平 { color: #4a8098; }
+  .type-中下 { color: #3a6a8a; }
+  .type-下下 { color: #2a4a5a; }
+
+  .result-story {
+    text-align: center; font-size: 0.9rem;
+    color: #3a6a8a; margin-bottom: 16px;
+    letter-spacing: 2px;
+  }
+
+  .divider {
+    width: 60%; height: 1px; margin: 0 auto 16px;
+    background: linear-gradient(90deg, transparent, rgba(100,180,230,0.3), transparent);
+  }
+
+  .poem {
+    text-align: center; line-height: 2.4;
+    font-size: 1.2rem; color: #d8eaf5;
+    font-family: 'Ma Shan Zheng', cursive;
+    letter-spacing: 3px; margin-bottom: 16px;
+  }
+
+  .interpretation {
+    background: rgba(0,0,0,0.35);
+    border-radius: 10px;
+    padding: 16px 18px; margin-top: 12px;
+  }
+  .interpretation h3 {
+    color: #5a9ab8; font-size: 1rem;
+    margin-bottom: 8px; letter-spacing: 4px;
+  }
+  .interpretation p {
+    font-size: 0.92rem; line-height: 1.9; color: #5a9ab8;
+  }
+
+  .detail-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 8px 16px; margin-top: 12px;
+  }
+  .detail-item { font-size: 0.85rem; color: #3a6a8a; }
+  .detail-item span { color: #5a9ab8; }
+
+  .btn-again {
+    display: block; margin: 24px auto 40px;
+    background: transparent;
+    border: 1.5px solid rgba(100,180,230,0.3);
+    color: #5a9ab8;
+    padding: 10px 36px;
+    font-family: 'Noto Serif SC', serif;
+    font-size: 0.95rem;
+    border-radius: 50px; cursor: pointer;
+    letter-spacing: 4px; transition: all 0.3s;
+  }
+  .btn-again:hover { background: rgba(100,180,230,0.06); }
+
+  @media (max-width: 480px) {
+    .header h1 { font-size: 2.4rem; letter-spacing: 8px; }
+    .poem { font-size: 1.1rem; }
+    .result-card { padding: 24px 16px; }
+    .lantern-wrapper { width: 170px; height: 190px; }
+    .lantern-circle { width: 170px; height: 170px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-layer"></div>
+<div class="particle-container" id="particleContainer"></div>
+
+<a href="guanyin.html" class="nav-link">← 观音灵签</a>
+<a href="guandi.html" class="nav-link-r">关帝灵签 →</a>
+<a href="lvzu.html" class="nav-link-r" style="top:38px">吕祖灵签 →</a>
+<a href="index.html" class="nav-link-r" style="top:60px">文王六十四卦 →</a>
+<a href="yuelao.html" class="nav-link-r" style="top:82px">月老灵签 →</a>
+<a href="caishen.html" class="nav-link-r" style="top:104px">财神灵签 →</a>
+<a href="huangdaxian.html" class="nav-link-r" style="top:126px">黄大仙灵签 →</a>
+
+<div class="container">
+  <div class="header">
+    <h1>妈祖灵签</h1>
+    <p>天后娘娘 · 护国庇民</p>
+    <div class="sub">海不扬波 · 有求必应</div>
+  </div>
+
+  <div class="lantern-area" id="lanternArea">
+    <div class="lantern-wrapper" id="lanternWrapper" onclick="drawLot()">
+      <div class="lantern-circle">
+        <svg class="lantern-icon" viewBox="0 0 100 200" xmlns="http://www.w3.org/2000/svg">
+          <!-- 妈祖航海灯笼 -->
+          <!-- 吊环 -->
+          <ellipse cx="50" cy="18" rx="8" ry="6" fill="none" stroke="#5a9ab8" stroke-width="2.5" opacity="0.7"/>
+          <!-- 提梁 -->
+          <line x1="42" y1="22" x2="38" y2="42" stroke="#4a8098" stroke-width="2" stroke-linecap="round"/>
+          <line x1="58" y1="22" x2="62" y2="42" stroke="#4a8098" stroke-width="2" stroke-linecap="round"/>
+          <!-- 灯笼顶盖 -->
+          <ellipse cx="50" cy="44" rx="22" ry="6" fill="#1a4a68" stroke="#5a9ab8" stroke-width="1.5"/>
+          <!-- 灯笼主体 -->
+          <path d="M 28 44 Q 22 80, 28 116 Q 34 130, 50 132 Q 66 130, 72 116 Q 78 80, 72 44"
+                fill="url(#lanternBody)" stroke="#5a9ab8" stroke-width="1.5" opacity="0.9"/>
+          <!-- 灯笼内光 -->
+          <ellipse cx="50" cy="85" rx="16" ry="28" fill="url(#innerGlow)" opacity="0.6"/>
+          <!-- 灯笼骨架竖条 -->
+          <path d="M 50 44 Q 50 88, 50 132" stroke="#3a6a8a" stroke-width="0.8" fill="none" opacity="0.5"/>
+          <path d="M 36 47 Q 30 85, 36 128" stroke="#3a6a8a" stroke-width="0.6" fill="none" opacity="0.4"/>
+          <path d="M 64 47 Q 70 85, 64 128" stroke="#3a6a8a" stroke-width="0.6" fill="none" opacity="0.4"/>
+          <!-- 灯笼横环 -->
+          <ellipse cx="50" cy="65" rx="24" ry="5" fill="none" stroke="#3a6a8a" stroke-width="0.6" opacity="0.4"/>
+          <ellipse cx="50" cy="88" rx="25" ry="5.5" fill="none" stroke="#3a6a8a" stroke-width="0.6" opacity="0.4"/>
+          <ellipse cx="50" cy="110" rx="23" ry="5" fill="none" stroke="#3a6a8a" stroke-width="0.6" opacity="0.4"/>
+          <!-- 灯笼上"天后"二字 -->
+          <text x="50" y="82" text-anchor="middle" font-family="Ma Shan Zheng, cursive" font-size="16" fill="#7cc4e8" opacity="0.7">天</text>
+          <text x="50" y="102" text-anchor="middle" font-family="Ma Shan Zheng, cursive" font-size="16" fill="#7cc4e8" opacity="0.7">后</text>
+          <!-- 灯笼底盖 -->
+          <ellipse cx="50" cy="132" rx="18" ry="5" fill="#1a4a68" stroke="#5a9ab8" stroke-width="1.2"/>
+          <!-- 灯笼底穗 -->
+          <line x1="50" y1="137" x2="50" y2="165" stroke="#5a9ab8" stroke-width="1.5" opacity="0.6"/>
+          <path d="M 44 158 Q 47 172, 50 178" stroke="#4a8098" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.5"/>
+          <path d="M 50 158 Q 50 172, 50 180" stroke="#5a9ab8" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.6"/>
+          <path d="M 56 158 Q 53 172, 50 178" stroke="#4a8098" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.5"/>
+          <!-- 渐变定义 -->
+          <defs>
+            <radialGradient id="lanternBody" cx="50%" cy="45%" r="55%">
+              <stop offset="0%" stop-color="#1a5a80" stop-opacity="0.8"/>
+              <stop offset="60%" stop-color="#0e3a55" stop-opacity="0.9"/>
+              <stop offset="100%" stop-color="#082030" stop-opacity="1"/>
+            </radialGradient>
+            <radialGradient id="innerGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#7cc4e8" stop-opacity="0.5"/>
+              <stop offset="50%" stop-color="#4a90b8" stop-opacity="0.2"/>
+              <stop offset="100%" stop-color="#1a4a68" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+        </svg>
+      </div>
+      <div class="lantern-text">天后圣灯</div>
+    </div>
+    <p class="hint" id="hint">点击求签 · 诚心祷告</p>
+    <button class="btn" onclick="drawLot()" id="drawBtn">求 签</button>
+  </div>
+
+  <div class="result" id="result"></div>
+</div>
+
+<script>
+// 海雾粒子
+const pCtn = document.getElementById('particleContainer');
+for (let i = 0; i < 18; i++) {
+  const p = document.createElement('div');
+  p.className = 'particle';
+  const colors = [
+    'radial-gradient(circle, rgba(100,180,230,0.5), transparent)',
+    'radial-gradient(circle, rgba(60,140,200,0.4), transparent)',
+    'radial-gradient(circle, rgba(120,200,240,0.35), transparent)'
+  ];
+  p.style.cssText = `
+    left: ${Math.random() * 100}%;
+    bottom: ${Math.random() * 20}%;
+    width: ${4 + Math.random() * 6}px;
+    height: ${4 + Math.random() * 6}px;
+    background: ${colors[i % 3]};
+    animation-duration: ${8 + Math.random() * 10}s;
+    animation-delay: ${Math.random() * 7}s;
+  `;
+  pCtn.appendChild(p);
+}
+
+// ====== 妈祖灵签 60 签 ======
+const lots = [
+  {num:1,type:"上上",poem:["天后圣母坐莲台","慈航普渡万民来","波平浪静开新运","一帆风顺喜门开"],story:"妈祖升天",jie:"天后庇佑之象。凡事大吉大利。如船遇顺风，万事亨通。"},
+  {num:2,type:"中吉",poem:["春风送暖入南洋","商船满载过重洋","只须信奉天妃在","保得平安到故乡"],story:"护佑商船",jie:"平安远行之象。凡事可行。诚心祈祷，天后保佑平安归来。"},
+  {num:3,type:"上吉",poem:["明灯高照海天清","万里波涛化坦平","此去前程多顺利","天后护持步步赢"],story:"湄洲显灵",jie:"明灯指路之象。凡事光明在前。天后护持，步步顺遂。"},
+  {num:4,type:"中平",poem:["云遮月暗夜沉沉","海上孤舟觅路寻","莫急且待天明后","自有灯火照前程"],story:"夜航迷途",jie:"暂时迷雾之象。凡事须待时机。急则有失，静则有得。"},
+  {num:5,type:"中吉",poem:["潮起潮落自有时","渔舟唱晚满载归","只须勤劳莫懈怠","天后赐福不须疑"],story:"渔民丰收",jie:"勤劳有获之象。凡事付出必有回报。天道酬勤，不须多疑。"},
+  {num:6,type:"大吉",poem:["龙王退避天妃令","四海升平万民宁","此签得之皆遂愿","福禄寿全乐太平"],story:"降伏龙王",jie:"天妃威德之象。凡事大吉大利。所求皆遂，福禄双全。"},
+  {num:7,type:"中下",poem:["风急浪高夜漫漫","孤帆远影碧空寒","此时不宜轻出海","守港避风待晴天"],story:"台风过境",jie:"风浪将至之象。凡事宜守不宜进。暂避风头，待天晴再行。"},
+  {num:8,type:"上吉",poem:["宝珠光照满天星","海上慈航渡众生","有缘得此天恩佑","一路平安万事成"],story:"天后赐珠",jie:"天恩浩荡之象。凡事贵人相助。有缘得佑，万事可成。"},
+  {num:9,type:"中吉",poem:["细雨绵绵润田畴","春耕秋收不须愁","天后赐福勤劳者","家业兴隆百事周"],story:"祈雨应验",jie:"甘霖润泽之象。凡事渐入佳境。勤恳踏实，家业可兴。"},
+  {num:10,type:"中平",poem:["海面平静暗流涌","表里不一须留神","此时切莫被表象","深思熟虑方可行"],story:"暗礁隐伏",jie:"暗流涌动之象。凡事表面虽平，内有变数。须深思熟虑。"},
+  {num:11,type:"上上",poem:["天后圣诞万民朝","香火鼎盛入云霄","此签最是祥瑞兆","一年四季乐逍遥"],story:"圣诞盛典",jie:"祥瑞满门之象。凡事大吉。四季平安，万事如意。"},
+  {num:12,type:"中吉",poem:["退潮之后见礁石","方知水下有乾坤","凡事须看真面目","莫被浮华遮慧根"],story:"退潮寻宝",jie:"去伪存真之象。凡事须看清本质。拨开迷雾，方见真章。"},
+  {num:13,type:"中下",poem:["乌云密布海天暗","雷声隐隐在远方","此时不宜谋大事","安守本分待晴光"],story:"风暴前兆",jie:"风雨欲来之象。凡事不宜大动。安分守己，静待转机。"},
+  {num:14,type:"上吉",poem:["千帆竞发趁东风","万里征程气势虹","天后庇佑行路者","凯旋归来建奇功"],story:"船队远航",jie:"东风助力之象。凡事乘势而为。天后庇佑，前程似锦。"},
+  {num:15,type:"中平",poem:["一叶扁舟随波逐","东西南北任风催","此时须得定方向","莫使漂泊失归途"],story:"随波逐流",jie:"方向不明之象。凡事须确定目标。漫无目的，终难有成。"},
+  {num:16,type:"中吉",poem:["海底明珠终出水","一朝光华照四方","多年沉寂今得志","天后助你展翅翔"],story:"采珠得宝",jie:"明珠出水之象。凡事蛰伏已久终见天日。才华得展，前途光明。"},
+  {num:17,type:"大吉",poem:["妈祖巡游四海平","旌旗猎猎万民迎","此签求得无不利","百事顺遂福满盈"],story:"妈祖巡海",jie:"四海升平之象。凡事大吉大利。百事顺遂，福气满盈。"},
+  {num:18,type:"中下",poem:["退潮之时勿贪行","远离礁石保安宁","此去前途多险阻","不如暂歇候佳音"],story:"搁浅之险",jie:"退潮危险之象。凡事宜退不宜进。贪功冒进恐有损失。"},
+  {num:19,type:"上吉",poem:["天后宫前香火旺","诚心祈愿必灵光","一片丹心天可鉴","所求之事自吉祥"],story:"进香还愿",jie:"诚心感天之象。凡事心诚则灵。所求之事，天后必佑。"},
+  {num:20,type:"中平",poem:["满潮将至水渐深","且看风向再决心","不急不缓方为上","天时地利自然临"],story:"观潮候时",jie:"等待时机之象。凡事不急不缓。天时未到，耐心等候。"},
+  {num:21,type:"中吉",poem:["渔火点点照海湾","归帆片片入港还","一日辛劳终有获","天后护佑笑开颜"],story:"归航入港",jie:"满载而归之象。凡事辛劳有获。收获在即，可以安心。"},
+  {num:22,type:"上上",poem:["海晏河清国太平","天后威德镇四瀛","此签得之皆如愿","一门和乐庆升平"],story:"海晏河清",jie:"太平盛世之象。凡事大吉。家宅和睦，万事如意。"},
+  {num:23,type:"中下",poem:["迷雾茫茫失航向","罗盘失灵路难行","此时宜静不宜动","等得雾散再前行"],story:"浓雾迷航",jie:"迷失方向之象。凡事暂不宜行动。静待迷雾散去，再做打算。"},
+  {num:24,type:"中吉",poem:["涨潮时节好行船","顺水顺风到岸前","天后指引明方向","一帆风顺乐无边"],story:"顺潮行船",jie:"顺势而为之象。凡事乘势而行。把握时机，事半功倍。"},
+  {num:25,type:"上吉",poem:["九天玄女传法旨","天后奉命济苍生","凡有所求皆应验","慈悲普照万民心"],story:"奉旨济民",jie:"天命所归之象。凡事吉祥如意。天后慈悲，有求必应。"},
+  {num:26,type:"中平",poem:["潮涨潮落自循环","月圆月缺总相关","世间万事皆如此","莫为得失太心烦"],story:"潮汐之理",jie:"循环往复之象。凡事有起有落。顺其自然，莫太执着。"},
+  {num:27,type:"中吉",poem:["海底珊瑚渐成林","岁月积累见真金","只须持之以恒久","天后助你达目的"],story:"珊瑚成林",jie:"积少成多之象。凡事贵在坚持。日积月累，终成大器。"},
+  {num:28,type:"下下",poem:["惊涛骇浪卷天来","舟覆人危命堪哀","此时万事皆不宜","闭门谢客避灾乖"],story:"海啸之警",jie:"大凶之象。凡事不利。切勿冒险，闭门避灾为上。"},
+  {num:29,type:"上吉",poem:["天后娘娘显威灵","救苦救难度众生","虔诚祈祷皆感应","化险为夷得安宁"],story:"救难显灵",jie:"逢凶化吉之象。凡事有惊无险。天后显灵，化危为安。"},
+  {num:30,type:"中平",poem:["海鸥翱翔逐浪飞","自由自在无牵累","此去随缘莫强求","一切自有天安排"],story:"海鸥逐浪",jie:"随缘自在之象。凡事不必强求。顺其自然，随遇而安。"},
+  {num:31,type:"上上",poem:["妈祖金身坐殿堂","万年香火永流芳","此签吉祥无可比","福泽绵长世代昌"],story:"金身永驻",jie:"万世吉昌之象。凡事大吉大利。福泽深厚，世代繁荣。"},
+  {num:32,type:"中吉",poem:["破浪前行志不移","千山万水亦何辞","天后护航心不惧","终达彼岸展雄姿"],story:"破浪远行",jie:"勇往直前之象。凡事坚定前行。虽有艰难，终达目标。"},
+  {num:33,type:"中下",poem:["独坐船头望远天","茫茫大海水连天","此时归程尚遥远","莫急慢行保安全"],story:"远洋思归",jie:"归途遥远之象。凡事尚需时日。不可急躁，慢行为安。"},
+  {num:34,type:"大吉",poem:["天后圣母赐洪福","门庭光彩映碧波","百事顺遂无忧虑","一家老少乐呵呵"],story:"圣母赐福",jie:"洪福齐天之象。凡事大吉。门庭光彩，阖家欢乐。"},
+  {num:35,type:"中平",poem:["鱼游浅水莫贪深","深处虽好有风险","知足常乐方为道","天后劝你守本分"],story:"鱼游浅水",jie:"量力而行之象。凡事不可贪多。知足常乐，守住本分。"},
+  {num:36,type:"中吉",poem:["东海日出映朝霞","万道金光照万家","新的开始新气象","天后助你建新业"],story:"东海日出",jie:"旭日东升之象。凡事新的开始。把握机遇，开创新局。"},
+  {num:37,type:"上吉",poem:["慈航普渡到南天","救苦寻声遍大千","此签得之多福报","一生平安享天年"],story:"慈航普渡",jie:"慈悲护佑之象。凡事逢凶化吉。福报深厚，一生平安。"},
+  {num:38,type:"中下",poem:["海市蜃楼空欢喜","镜花水月梦一场","此时切莫信虚象","脚踏实地是良方"],story:"海市蜃楼",jie:"虚幻不实之象。凡事不可被假象迷惑。脚踏实地方为正途。"},
+  {num:39,type:"中吉",poem:["风平浪静好行舟","水色天光共一楼","此去前途渐开朗","天后送你到渡头"],story:"风平浪静",jie:"平安顺利之象。凡事渐入佳境。天后护送，安然抵达。"},
+  {num:40,type:"中平",poem:["半帆微风半帆雨","行行停停路不齐","此时莫怨天不公","风雨过后见虹霓"],story:"半帆微风",jie:"时好时坏之象。凡事反复不定。耐心面对，终见彩虹。"},
+  {num:41,type:"上上",poem:["天后灵签第一灵","有求必应最分明","此签求得万事吉","福禄寿喜四星临"],story:"四星拱照",jie:"四星高照之象。凡事大吉大利。福禄寿喜齐聚，万事如意。"},
+  {num:42,type:"中吉",poem:["海纳百川成大洋","心宽体胖自安康","天后劝你多包容","和气生财福满堂"],story:"海纳百川",jie:"胸怀宽广之象。凡事以和为贵。包容大度，和气生财。"},
+  {num:43,type:"中下",poem:["逆水行舟用力撑","一篙松劲退千寻","此时不宜轻松懈","咬紧牙关再前行"],story:"逆水行舟",jie:"困难重重之象。凡事须加倍努力。稍有松懈便前功尽弃。"},
+  {num:44,type:"上吉",poem:["灵龟献瑞海天开","天后座前福自来","所求之事皆如意","一年到头尽和谐"],story:"灵龟献瑞",jie:"祥瑞之兆。凡事吉祥如意。天后赐福，全年和谐顺遂。"},
+  {num:45,type:"中平",poem:["水至清处可见底","心至诚时天自知","此去虽然路不远","一步一步稳中行"],story:"清水见底",jie:"脚踏实地之象。凡事宜稳不宜急。一步一个脚印，方得始终。"},
+  {num:46,type:"中吉",poem:["渔歌唱晚霞满天","丰收喜悦满心间","辛劳一年终有报","天后赐福乐团圆"],story:"渔歌唱晚",jie:"丰收喜悦之象。凡事收获在望。辛苦付出终有回报。"},
+  {num:47,type:"大吉",poem:["妈祖出巡百灵随","祥云瑞气满天飞","此签得之最为贵","万事亨通不须追"],story:"妈祖出巡",jie:"百灵朝拜之象。凡事大吉大利。万事亨通，无须多求自然来。"},
+  {num:48,type:"中下",poem:["暗夜行船无灯火","前方礁石不可知","此时万事宜谨慎","一步走错悔莫及"],story:"暗夜无灯",jie:"前路不明之象。凡事须十分谨慎。一着不慎，满盘皆输。"},
+  {num:49,type:"上吉",poem:["宝船出港趁良辰","满载珍宝值千金","天后护航无险阻","平安归来笑盈盈"],story:"宝船出港",jie:"满载而归之象。凡事出行大吉。天后护航，收获丰厚。"},
+  {num:50,type:"中平",poem:["守得云开见日头","一番风雨一番愁","天后劝你莫忧虑","雨后自有好兆头"],story:"守得云开",jie:"先苦后甘之象。凡事经历风雨方见彩虹。耐心等待，好运将至。"},
+  {num:51,type:"中吉",poem:["海上生明月","天涯共此时","天后赐良缘","千里来相会"],story:"海上明月",jie:"良缘天定之象。凡事有缘千里来相会。姻缘事业皆有良机。"},
+  {num:52,type:"上上",poem:["天后圣德配天高","四海八方尽来朝","此签得之百事顺","福如东海寿如松"],story:"万方来朝",jie:"至尊之象。凡事大吉大利。福如东海，寿比南山。百事顺遂。"},
+  {num:53,type:"中下",poem:["风起云涌海天变","波涛汹涌浪滔天","此时宜守不宜行","待得风停再向前"],story:"风云突变",jie:"突变之象。凡事须防意外。暂停行动，等待风平。"},
+  {num:54,type:"中吉",poem:["老蚌含珠终吐光","十年辛苦不寻常","天后怜你诚心意","赐你明珠照四方"],story:"老蚌含珠",jie:"厚积薄发之象。凡事多年积累终见成果。天后怜惜诚心之人。"},
+  {num:55,type:"上吉",poem:["瑞气东来满港湾","渔舟竞发笑开颜","天后庇佑诚心者","一帆风顺永平安"],story:"瑞气满港",jie:"瑞气临门之象。凡事大吉。诚心祈祷，天后必佑。"},
+  {num:56,type:"中平",poem:["水深火热莫惊慌","天后在上有主张","只须诚心多行善","自有贵人来帮忙"],story:"诚心感天",jie:"贵人相助之象。凡事虽有困难但有贵人。多行善事，自有天助。"},
+  {num:57,type:"中吉",poem:["碧波万顷映蓝天","白帆点点渡云烟","此去一程风景好","天后伴你到桃源"],story:"碧波万顷",jie:"前景美好之象。凡事一路风景甚佳。天后相伴，前途可期。"},
+  {num:58,type:"大吉",poem:["天后显灵万家安","风调雨顺庆丰年","此签大吉无疑虑","百事如意福寿全"],story:"风调雨顺",jie:"国泰民安之象。凡事大吉大利。风调雨顺，福寿双全。"},
+  {num:59,type:"中下",poem:["独木难支大厦倾","单丝不成线难成","此时须得众人助","合力同心方可行"],story:"独木难支",jie:"孤掌难鸣之象。凡事不可独行。须借众力，合作方成。"},
+  {num:60,type:"上上",poem:["六十灵签皆圆满","天后慈悲度众生","此签得之最为吉","万事亨通福禄增"],story:"圆满归一",jie:"圆满之签。六十签归一，道法自然。天后慈悲，万事亨通。福禄增辉。"}
+];
+
+let isDrawing = false;
+
+function drawLot() {
+  if (isDrawing) return;
+  isDrawing = true;
+
+  const btn = document.getElementById('drawBtn');
+  const hint = document.getElementById('hint');
+  const area = document.getElementById('lanternArea');
+  const resultEl = document.getElementById('result');
+
+  btn.disabled = true;
+  hint.textContent = '天后显灵中...';
+  hint.style.animation = 'none';
+  resultEl.classList.remove('show');
+
+  area.classList.add('shaking');
+
+  setTimeout(() => {
+    area.classList.remove('shaking');
+
+    const flash = document.createElement('div');
+    flash.className = 'flash';
+    document.body.appendChild(flash);
+    setTimeout(() => flash.remove(), 600);
+
+    setTimeout(() => {
+      const lot = lots[Math.floor(Math.random() * lots.length)];
+      showResult(lot);
+      isDrawing = false;
+      btn.disabled = false;
+      hint.textContent = '点击求签 · 再次祷告';
+      hint.style.animation = 'pulse 2s ease-in-out infinite';
+    }, 400);
+  }, 2000);
+}
+
+function showResult(lot) {
+  const el = document.getElementById('result');
+  const typeClass = getTypeClass(lot.type);
+
+  el.innerHTML = `
+    <div class="result-card">
+      <div class="result-num">第 ${lot.num} 签</div>
+      <div class="result-type ${typeClass}">${lot.type}签</div>
+      <div class="result-story">典故：${lot.story}</div>
+      <div class="divider"></div>
+      <div class="poem">
+        ${lot.poem.map(l => l + '<br>').join('')}
+      </div>
+      <div class="divider"></div>
+      <div class="interpretation">
+        <h3>圣 意</h3>
+        <p>${lot.jie}</p>
+      </div>
+      <div class="interpretation" style="margin-top:10px;">
+        <h3>签 意</h3>
+        <div class="detail-grid">
+          <div class="detail-item">求财：<span>${getAdvice(lot.type,'财')}</span></div>
+          <div class="detail-item">姻缘：<span>${getAdvice(lot.type,'婚')}</span></div>
+          <div class="detail-item">事业：<span>${getAdvice(lot.type,'业')}</span></div>
+          <div class="detail-item">健康：<span>${getAdvice(lot.type,'健')}</span></div>
+          <div class="detail-item">出行：<span>${getAdvice(lot.type,'行')}</span></div>
+          <div class="detail-item">诉讼：<span>${getAdvice(lot.type,'讼')}</span></div>
+        </div>
+      </div>
+    </div>
+    <button class="btn-again" onclick="drawLot()">再 求 一 签</button>
+  `;
+
+  requestAnimationFrame(() => {
+    el.classList.add('show');
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+}
+
+function getTypeClass(type) {
+  if (type === '上上' || type === '大吉') return 'type-上上';
+  if (type === '上吉') return 'type-上吉';
+  if (type === '中吉') return 'type-中吉';
+  if (type === '中平') return 'type-中平';
+  if (type === '中下') return 'type-中下';
+  if (type === '下下') return 'type-下下';
+  return 'type-中平';
+}
+
+function getAdvice(type, cat) {
+  const a = {
+    '上上': {财:'大利，财源广进',婚:'天赐良缘',业:'功成名就',健:'身强体壮',行:'一路平安',讼:'必胜'},
+    '大吉': {财:'大利，财源广进',婚:'天赐良缘',业:'功成名就',健:'身强体壮',行:'一路平安',讼:'必胜'},
+    '上吉': {财:'吉，进财顺利',婚:'良缘可成',业:'步步高升',健:'安康无恙',行:'出入平安',讼:'有利'},
+    '中吉': {财:'小利，勤劳可得',婚:'有望，需耐心',业:'渐有起色',健:'小心调养',行:'宜近不宜远',讼:'宜和解'},
+    '中平': {财:'平平，量入为出',婚:'随缘',业:'守成为上',健:'注意休息',行:'无大碍',讼:'平手'},
+    '中下': {财:'不宜投资',婚:'暂缓',业:'宜守不宜攻',健:'宜多调养',行:'不宜远行',讼:'不利'},
+    '下下': {财:'谨慎守财',婚:'不宜',业:'韬光养晦',健:'多加注意',行:'不宜出行',讼:'宜避'}
+  };
+  return (a[type] && a[type][cat]) || '顺其自然';
+}
+</script>
+</body>
+</html>
